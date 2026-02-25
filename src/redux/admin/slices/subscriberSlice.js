@@ -35,14 +35,26 @@ export const getAllSubscribers = createAsyncThunk(
 );
 
 
+// export const removeSubscriber = createAsyncThunk(
+//     "admin/removeSubscriber",
+//     async ({ subscription_id }, { rejectWithValue }) => {
+//         try {
+//             await checkLogin()
+//             const response = await api.deleteSubscriber(subscription_id);
+
+//             return response.data; // Return the ID of the deleted subscriber
+//         } catch (error) {
+//             return rejectWithValue(error.response?.data || error.message);
+//         }
+//     }
+// );
 export const removeSubscriber = createAsyncThunk(
     "admin/removeSubscriber",
-    async ({ subscription_id }, { rejectWithValue }) => {
+    async (selectedId, { rejectWithValue }) => {
         try {
-            await checkLogin()
-            const response = await api.deleteSubscriber(subscription_id);
-
-            return response.data; // Return the ID of the deleted subscriber
+            await checkLogin();
+            const response = await api.deleteSubscriber(selectedId);
+            return selectedId; // return deleted ID
         } catch (error) {
             return rejectWithValue(error.response?.data || error.message);
         }
