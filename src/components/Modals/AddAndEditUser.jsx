@@ -9,14 +9,34 @@ const AddAndEditUser = ({ editedData = {}, onSubmit }) => {
     const dispatch = useDispatch();
     const { plans } = useSelector((state) => state.user)
     const [allPlan, setAllPlan] = useState([])
+
+    console.log("checkdtaaaaaabc__", allPlan)
+
     useEffect(() => {
         if (hasFetched.current) return;
         hasFetched.current = true;
         dispatch(allPlans())
     }, []);
+    // useEffect(() => {
+    //     if (plans) {
+    //         setAllPlan(plans)
+    //     }
+    // }, [plans]);
     useEffect(() => {
-        if (plans) {
-            setAllPlan(plans)
+        if (plans && plans.length > 0) {
+
+            const filteredPlans = plans.filter(plan => {
+                if (
+                    (plan.duraction === "yearly" || plan.duraction === "month") &&
+                    plan.is_storeage === 1
+                ) {
+                    return false;
+                }
+
+                return true;
+            });
+
+            setAllPlan(filteredPlans);
         }
     }, [plans]);
 
@@ -151,12 +171,12 @@ const AddAndEditUser = ({ editedData = {}, onSubmit }) => {
                             </label>
                         </div> */}
                         <div className="payment-div">
-                            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                            {/* <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                                 <p className="upload-content-heading" style={{ margin: 0 }}>
                                     Payment Status
                                 </p>
                                 <p className="switch-text">Switch to mark as paid</p>
-                            </div>
+                            </div> */}
 
                             <label className="switch">
                                 <input

@@ -108,8 +108,8 @@ const AddEditPlanManagement = ({ initialData = null, onSubmit }) => {
                                             Select Duration
                                         </option>
                                         {/* <option value="quarter">Quarterly</option> */}
-                                        <option value="monthly">Monthly</option>
-                                        <option value="yearly">Yearly</option>
+                                        <option value="month">Monthly</option>
+                                        <option value="year">Yearly</option>
                                     </Field>
                                     <ErrorMessage name="duration" render={(msg) => <div style={errorStyle}>{msg}</div>} />
                                 </div>
