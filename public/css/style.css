@@ -114,15 +114,13 @@
 
 .sidebar.hidden.sidebar-link.sidebar-option img {
   width: 24px;
-    height: 24px;
+  height: 24px;
 }
 .sidebar.hidden .sidebar-option:hover,
 .sidebar.hidden .sidebar-option.active {
   width: 32px;
   transition: width 0.3s ease;
 }
-
-
 
 /* MAIN CONTENT */
 .content {
@@ -621,7 +619,6 @@
     width: auto;
   }
 }
-
 
 /* User Management Page Css */
 
@@ -2004,6 +2001,7 @@
   padding-right: 10px;
   padding-left: 10px;
   background: #4b5563;
+  /* background: #097140; */
   font-family: "Segoe UI";
   font-weight: 500;
   font-style: Medium;
@@ -2073,8 +2071,17 @@
   color: #ffffff;
 }
 
-.features-popup-body {
+/* .features-popup-body {
   padding: 24px;
+} */
+
+.features-popup-body {
+  position: relative;
+  flex: 1 1 auto;
+  /* padding: var(--bs-modal-padding); */
+  padding: 5px 10px 30px 10px;
+  /* padding-bottom: 50px !important; */
+  /* border: 3px solid yellow !important; */
 }
 
 .features-list {
@@ -2446,5 +2453,4 @@
   justify-items: center;
 }
 
-/* New CSS Satyaprakash*/ 
-
+/* New CSS Satyaprakash*/
