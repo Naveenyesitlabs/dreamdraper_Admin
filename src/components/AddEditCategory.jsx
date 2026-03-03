@@ -45,7 +45,7 @@ const AddEditCategory = ({ initialData = null, onSubmit, onReset, isEdit }) => {
                     <div className="modal-body add-category-body" style={{ paddingBottom: 0 }}>
                         <form onSubmit={formik.handleSubmit}>
                             <div className="mb-3">
-                                <label htmlFor="name" className="form-label category-name">Category Name</label>
+                                <label htmlFor="name" className="form-label category-name">Category Name@@@</label>
                                 <input
                                     type="text"
                                     className={`category-input ${formik.touched.category_name && formik.errors.category_name ? 'is-invalid' : ''}`}
