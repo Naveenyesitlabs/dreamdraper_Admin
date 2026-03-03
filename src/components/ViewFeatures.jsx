@@ -31,7 +31,8 @@ const ViewFeatures = ({ initialData }) => {
                         />
                     </div>
 
-                    <div className="modal-body features-popup-body">
+                    {/* <div className="modal-body features-popup-body"> */}
+                    <div className="features-popup-body">
                         <p className="features">Features</p>
 
                         {features.length > 0 ? (

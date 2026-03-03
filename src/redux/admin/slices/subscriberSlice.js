@@ -62,6 +62,21 @@ export const removeSubscriber = createAsyncThunk(
 );
 
 
+export const updateManualSubscription = createAsyncThunk(
+    "admin/updateManualSubscription",
+    async ({ id, payload }, { rejectWithValue }) => {
+        try {
+            await checkLogin()
+            const response = await api.updateManualSubscription(id, payload);
+
+            return response.data; // Return the ID of the deleted subscriber
+        } catch (error) {
+            return rejectWithValue(error.response?.data || error.message);
+        }
+    }
+);
+
+
 
 const subscriberSlice = createSlice({
     name: "subscribers",
@@ -107,6 +122,23 @@ const subscriberSlice = createSlice({
                 }
                 toast.error(action?.payload?.message)
             })
+
+            .addCase(updateManualSubscription.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(updateManualSubscription.fulfilled, (state, action) => {
+                state.loading = false;
+                toast.success(action?.payload?.message || "Subscription category updated")
+            })
+            .addCase(updateManualSubscription.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload || action.error.message;
+                // if (action?.payload?.status == 403) {
+                //     logouterror()
+                // }
+                toast.error(action?.payload?.message)
+            });
     }
 })
 

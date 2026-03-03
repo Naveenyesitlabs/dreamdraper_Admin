@@ -187,7 +187,7 @@ const UserManagement = () => {
                                             }
 
                                             <div onClick={() => { setSearchTearm('Active'); setIsDropdownOpen(false); }}>Active</div>
-                                            <div onClick={() => { setSearchTearm('In Active'); setIsDropdownOpen(false); }}>In Active</div>
+                                            <div onClick={() => { setSearchTearm('In Active'); setIsDropdownOpen(false); }}>Inactive</div>
 
                                         </div>
                                     )}

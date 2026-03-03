@@ -9,7 +9,17 @@ const AddEditShowcases = ({ initialData = null, onSubmit }) => {
     const hasFetched = useRef(false);
     const isEdit = Boolean(initialData);
     const MAX_SIZE = 50 * 1024 * 1024; // 50MB size limit
-    const [uploadedFile, setUploadedFile] = useState(initialData?.file || null);
+    // const [uploadedFile, setUploadedFile] = useState(initialData?.file || null);
+    const [uploadedFile, setUploadedFile] = useState(null);
+
+    useEffect(() => {
+        if (initialData?.file) {
+            setUploadedFile({ name: initialData.file });
+        } else {
+            setUploadedFile(null);
+        }
+    }, [initialData]);
+
     const [tutorialCate, setTutorialCate] = useState([])
     const { mainCategoryData } = useSelector((state) => state.libCategory);
 
@@ -63,7 +73,10 @@ const AddEditShowcases = ({ initialData = null, onSubmit }) => {
             formData.append('title', values.title);
             formData.append('category_id', values.category_id || '');
             formData.append('description', values.description || '');
-            formData.append('file', values.file || '');
+            // formData.append('file', values.file || '');
+            if (values.file instanceof File) {
+                formData.append('file', values.file);
+            }
             onSubmit(formData, isEdit);
             resetForm();
             setUploadedFile(null);
@@ -196,7 +209,7 @@ const AddEditShowcases = ({ initialData = null, onSubmit }) => {
                                     <p className="uploaded-txt">{uploadedFile.name}</p>
                                 </div>
                                 <div className="upload-text-another">
-                                    <button type="button" className="image-size" style={{ cursor: "default", width: '75px' }}>
+                                    {/* <button type="button" className="image-size" style={{ cursor: "default", width: '75px' }}>
                                         {uploadedFile && (() => {
                                             const sizeInKB = uploadedFile.size / 1024;
                                             if (sizeInKB < 1024) {
@@ -206,7 +219,25 @@ const AddEditShowcases = ({ initialData = null, onSubmit }) => {
                                                 return `${sizeInMB.toFixed(2)} MB`;
                                             }
                                         })()}
-                                    </button>
+                                    </button> */}
+                                    {uploadedFile.size && (
+                                        <button
+                                            type="button"
+                                            className="image-size"
+                                            style={{ cursor: "default", width: '75px' }}
+                                        >
+                                            {(() => {
+                                                const sizeInKB = uploadedFile.size / 1024;
+                                                if (sizeInKB < 1024) {
+                                                    return `${sizeInKB.toFixed(0)} KB`;
+                                                } else {
+                                                    const sizeInMB = sizeInKB / 1024;
+                                                    return `${sizeInMB.toFixed(2)} MB`;
+                                                }
+                                            })()}
+                                        </button>
+                                    )}
+
                                     <img
                                         src="./images/blue-cross.svg"
                                         className="blue-cross"

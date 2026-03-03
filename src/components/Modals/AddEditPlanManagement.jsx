@@ -5,11 +5,25 @@ import * as Yup from "yup";
 const AddEditPlanManagement = ({ initialData = null, onSubmit }) => {
     const isEdit = Boolean(initialData);
 
+    // const initialValues = {
+    //     plan_name: initialData?.plan_name || "",
+    //     features: initialData?.features
+    //         ? Array.isArray(initialData.features)
+    //             ? initialData.features.join(", ")
+    //             : initialData.features.toString()
+    //         : "",
+    //     duraction: initialData?.duraction || "",
+    //     price: initialData?.price || "",
+    //     is_active: initialData
+    //         ? Boolean(Number(initialData?.is_active))
+    //         : true,
+    // };
+
     const initialValues = {
         plan_name: initialData?.plan_name || "",
         features: initialData?.features
             ? Array.isArray(initialData.features)
-                ? initialData.features.join(", ")
+                ? initialData.features.map(f => `• ${f}`).join("\n")  // Changed this line
                 : initialData.features.toString()
             : "",
         duraction: initialData?.duraction || "",
@@ -18,6 +32,7 @@ const AddEditPlanManagement = ({ initialData = null, onSubmit }) => {
             ? Boolean(Number(initialData?.is_active))
             : true,
     };
+
 
     const validationSchema = Yup.object({
         plan_name: Yup.string().required("Plan name is required"),

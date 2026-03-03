@@ -88,3 +88,7 @@ export const deleteSubscriber = (subscription_id) => API.delete(`/admin/delete-s
 export const fetchAllMeasuringForms = () => API.get('/admin/get-forms');
 export const addNewMeasuringForms = (formData) => API.post('/admin/new-forms', formData);
 export const changeMeasuringForms = (formData) => API.post('/admin/updates-forms', formData);
+
+//Subscription edit manual
+
+export const updateManualSubscription = (id, formData) => API.put(`/admin/update-subscriber/${id}`, formData);

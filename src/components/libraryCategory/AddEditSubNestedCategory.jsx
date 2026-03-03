@@ -35,6 +35,8 @@ const AddEditSubNestedCategory = ({ initialData = null, onSubmit, onReset, isEdi
             resetForm();
             setSelectedCate(null)
             if (isEdit) onReset();
+
+            document.querySelector('[data-bs-dismiss="modal"]').click();
         },
     });
 
