@@ -244,9 +244,26 @@ const AddAndEditUser = ({ editedData = {}, onSubmit }) => {
         hasFetched.current = true;
         dispatch(allPlans())
     }, []);
+    // useEffect(() => {
+    //     if (plans) {
+    //         setAllPlan(plans)
+    //     }
+    // }, [plans]);
     useEffect(() => {
-        if (plans) {
-            setAllPlan(plans)
+        if (plans && plans.length > 0) {
+
+            const filteredPlans = plans.filter(plan => {
+                if (
+                    (plan.duraction === "yearly" || plan.duraction === "month") &&
+                    plan.is_storeage === 1
+                ) {
+                    return false;
+                }
+
+                return true;
+            });
+
+            setAllPlan(filteredPlans);
         }
     }, [plans]);
 
