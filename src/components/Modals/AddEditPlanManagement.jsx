@@ -47,8 +47,14 @@ const AddEditPlanManagement = ({ initialData = null, onSubmit }) => {
     const handleSubmit = (values, { resetForm }) => {
         const payload = {
             ...values,
+            // features: values.features
+            //     ? values.features.split(",").map(f => f.trim())
+            //     : [],
             features: values.features
-                ? values.features.split(",").map(f => f.trim())
+                ? values.features
+                    .split("\n")
+                    .map(f => f.replace(/^•\s*/, "").trim()) // remove bullet if present
+                    .filter(f => f !== "")
                 : [],
             is_active: values.is_active ? 1 : 0,
             ...(isEdit && { id: initialData.id }),
@@ -111,6 +117,7 @@ const AddEditPlanManagement = ({ initialData = null, onSubmit }) => {
                                         name="features"
                                         placeholder="Enter features separated by commas"
                                         className="upload-content-textarea"
+                                        disabled
                                     />
                                     <ErrorMessage name="features" render={(msg) => <div style={errorStyle}>{msg}</div>} />
                                 </div>
