@@ -100,7 +100,13 @@ const SubscriptionManagement = () => {
 
     useEffect(() => {
         const showcases = Array.isArray(data) ? data : [];
-        let filtered = [...showcases];
+
+        // ❗ remove unwanted plans first
+        let filtered = showcases.filter(
+            item =>
+                item.Plan?.plan_name !== "Premium (50 GB)" &&
+                item.Plan?.plan_name !== "Basic (20 GB)"
+        );
         if (search) {
             const term = search.toLowerCase();
             filtered = filtered.filter(item =>
@@ -175,9 +181,9 @@ const SubscriptionManagement = () => {
     };
 
 
-    const totalItems = filteredData?.length;
+    const totalItems = filteredData?.length || 0;
     const startIndex = (currentPage - 1) * itemsPerPage;
-    const currentItems = filteredData?.slice(startIndex, startIndex + itemsPerPage);
+    const currentItems = filteredData?.slice(startIndex, startIndex + itemsPerPage) || [];
 
     useEffect(() => {
         if (currentItems)
@@ -220,7 +226,6 @@ const SubscriptionManagement = () => {
         setIsDropdownOpen(prev => !prev);
     }
 
-    console.log("checkplain___", currentItems)
 
     return (
         <>
@@ -317,7 +322,7 @@ const SubscriptionManagement = () => {
                                         {currentItems && currentItems.length > 0 ? (
                                             currentItems.map((item, index) => (
                                                 <tr key={item.id}>
-                                                    <td>{index + 1}</td>
+                                                    <td>{startIndex + index + 1}</td>
 
                                                     <td>{item.User?.name || '---'}</td>
                                                     {/* <td>{item.User?.username || '---'}</td> */}
