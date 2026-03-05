@@ -25,6 +25,7 @@ const SubscriptionManagement = () => {
     const [filteredData, setFilteredData] = useState(null)
     const [search, setSearch] = useState('')
     const [dateRange, setDateRange] = useState({ startDate: null, endDate: null });
+    const [selectedId, setSelectedId] = useState(null);
 
     const [editedData, setEditedData] = useState({});
 
@@ -185,10 +186,23 @@ const SubscriptionManagement = () => {
 
     const handleResetForm = () => { }
 
-    const handleDelete = (id) => {
-        dispatch(removeSubscriber({ subscription_id: id }));
-        dispatch(getAllSubscribers());
-    }
+    // const handleDelete = (id) => {
+    //     dispatch(removeSubscriber({ subscription_id: id }));
+    //     dispatch(getAllSubscribers());
+    // }
+
+    const handleDelete = () => {
+        if (!selectedId) return;
+        dispatch(removeSubscriber(selectedId))
+            .unwrap()
+            .then(() => {
+                dispatch(getAllSubscribers());
+                setSelectedId(null); // reset after delete
+            })
+            .catch((err) => {
+                console.error(err);
+            });
+    };
 
     // function toggleDropdown() {
     //     const menu = document.getElementById("dropdownMenu");
@@ -376,6 +390,7 @@ const SubscriptionManagement = () => {
                                                             className='bg-transparent border-0'
                                                             data-bs-toggle="modal"
                                                             data-bs-target="#deleteDesign"
+                                                            onClick={() => setSelectedId(item.id)}
                                                         >
                                                             <img
                                                                 src="./images/del-solid.svg"
