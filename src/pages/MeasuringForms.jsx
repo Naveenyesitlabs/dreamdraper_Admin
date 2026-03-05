@@ -154,7 +154,7 @@ const MeasuringForms = () => {
                                                 <tr key={item.id || index}>
                                                     <td>{index + 1}</td>
                                                     <td className="tutorials-data">{item.title}</td>
-                                                    <td className="main-cat">$ {item.price}</td>
+                                                    <td className="main-cat">${item.price}</td>
                                                     <td className="main-cat">{item.description}</td>
                                                     <td className="nested-cat">{formatDateUSA(item.createdAt) || "-"}</td>
                                                     <td>

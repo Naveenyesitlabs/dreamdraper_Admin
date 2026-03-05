@@ -117,7 +117,7 @@ const AddEditPlanManagement = ({ initialData = null, onSubmit }) => {
                                         name="features"
                                         placeholder="Enter features separated by commas"
                                         className="upload-content-textarea"
-                                        disabled={isEdit}
+                                        disabled
                                     />
                                     <ErrorMessage name="features" render={(msg) => <div style={errorStyle}>{msg}</div>} />
                                 </div>

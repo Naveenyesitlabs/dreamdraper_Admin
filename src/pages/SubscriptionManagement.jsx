@@ -220,6 +220,8 @@ const SubscriptionManagement = () => {
         setIsDropdownOpen(prev => !prev);
     }
 
+    console.log("checkplain___", currentItems)
+
     return (
         <>
             <div className="content">
