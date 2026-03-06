@@ -129,7 +129,7 @@ const PlanManagement = () => {
                                             <th>S.No.</th>
                                             <th className="profile-pic">Plan Name</th>
                                             <th className="table-expand">Pricing</th>
-                                            <th className="" style={{width:"179px"}}>Subscribers</th>
+                                            <th className="" style={{ width: "179px" }}>Subscribers</th>
                                             <th className="table-expand1">Features</th>
                                             <th className="table-expand1">Status</th>
                                             <th className="table-expand1">Action</th>
