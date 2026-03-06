@@ -249,20 +249,13 @@ const AddAndEditUser = ({ editedData = {}, onSubmit }) => {
     //         setAllPlan(plans)
     //     }
     // }, [plans]);
+
     useEffect(() => {
         if (plans && plans.length > 0) {
 
             const filteredPlans = plans.filter(plan => {
-                if (
-                    (plan.duraction === "yearly" || plan.duraction === "month") &&
-                    plan.is_storeage === 1
-                ) {
-                    return false;
-                }
-
-                return true;
+                return plan.is_storeage == 0;
             });
-
             setAllPlan(filteredPlans);
         }
     }, [plans]);
