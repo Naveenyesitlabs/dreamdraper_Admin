@@ -268,7 +268,7 @@ const AddAndEditUser = ({ editedData = {}, onSubmit }) => {
             name: editedData.name || "",
             email: editedData.email || "",
             phone: editedData.phone || "",
-            plan_id: editedData.plan_id || "13",
+            plan_id: editedData.plan_id || "17",
             payment_status: editedData.payment_status || "unpaid",
         },
         enableReinitialize: true,
