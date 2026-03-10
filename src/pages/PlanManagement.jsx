@@ -29,6 +29,7 @@ const PlanManagement = () => {
     }, [])
 
     useEffect(() => {
+        // console.log("allPlans###", allPlans)
         if (allPlans) {
             setPlans(allPlans)
         }
@@ -129,7 +130,7 @@ const PlanManagement = () => {
                                             <th>S.No.</th>
                                             <th className="profile-pic">Plan Name</th>
                                             <th className="table-expand">Pricing</th>
-                                            <th className="" style={{ width: "179px" }}>Subscribers</th>
+                                            <th className="" style={{width:"179px"}}>Subscribers</th>
                                             <th className="table-expand1">Features</th>
                                             <th className="table-expand1">Plan Type</th>
                                             <th className="table-expand1">Status</th>
