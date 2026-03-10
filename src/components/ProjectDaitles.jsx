@@ -148,12 +148,18 @@ const ProjectDaitles = ({ user, onBack }) => {
                                                     </div>
 
                                                     <a href={project?.blueprint} download target="_blank">
-                                                        <img
+                                                        {/* <img
                                                             src="./images/dwnload-icon.svg"
                                                             className="new-download"
                                                             alt="Download"
                                                             style={{ width: "22px", cursor: "pointer" }}
-                                                        />
+                                                        /> */}
+                                                        <img
+                                                                        src="./images/solid-eye.svg"
+                                                                        className="eye-img"
+                                                                        alt="view"
+                                                                        style={{ width: "22px", cursor: "pointer" }}
+                                                                    />
                                                     </a>
 
                                                 </div>

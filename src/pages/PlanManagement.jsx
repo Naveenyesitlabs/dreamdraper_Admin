@@ -132,6 +132,7 @@ const PlanManagement = () => {
                                             <th className="table-expand">Pricing</th>
                                             <th className="" style={{width:"179px"}}>Subscribers</th>
                                             <th className="table-expand1">Features</th>
+                                            <th className="table-expand1">Plan Type</th>
                                             <th className="table-expand1">Status</th>
                                             <th className="table-expand1">Action</th>
 
@@ -177,7 +178,9 @@ const PlanManagement = () => {
                                                             />
                                                         </a>
                                                     </td>
-
+                                                    <td className="main-cat">
+                                                        {plan.plan_type || 0}
+                                                    </td>
                                                     <td>
                                                         {/* <button
                                                             className="status-btn-library"
