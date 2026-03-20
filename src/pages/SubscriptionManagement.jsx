@@ -310,6 +310,8 @@ const SubscriptionManagement = () => {
                                             {/* <th className="table-expand">Username</th> */}
                                             <th className="table-expand">Email ID</th>
                                             <th className="table-expand">Phone Number</th>
+                                            <th className="table-expand">Address</th>
+                                            <th className="table-expand">State</th>
                                             {/* <th className="table-expand">Transaction ID</th> */}
                                             <th className="table-expand">Status</th>
                                             <th className="table-expand">Plan</th>
@@ -328,7 +330,8 @@ const SubscriptionManagement = () => {
                                                     {/* <td>{item.User?.username || '---'}</td> */}
                                                     <td>{item.User?.email || '---'}</td>
                                                     <td>{item.User?.phone || '---'}</td>
-
+                                                    <td>{item.User?.address || '---'}</td>
+                                                    <td>{item.User?.state || '---'}</td>
                                                     {/* <td>{item.transaction_id || '---'}</td> */}
 
                                                     <td>
