@@ -24,6 +24,7 @@ const Showcases = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedId, setSelectedId] = useState('')
     const [filteredData, setFilteredData] = useState(null)
+    const [isView, setIsView] = useState(false);
     const [search, setSearch] = useState('')
     const itemsPerPage = 10;
 
@@ -40,9 +41,10 @@ const Showcases = () => {
     }, [dispatch, showcasesData])
 
     const handleClose = () => {
-        // setSelectedTemplate(null)
         setSelectedId('');
-    }
+        setEditedData(null);
+        setIsView(false);
+    };
 
     const handleDelete = async () => {
         try {
@@ -67,12 +69,7 @@ const Showcases = () => {
                 item?.title?.toLowerCase().includes(term)
             );
         }
-        // if (searchTearm == 'Active') {
-        //     filtered = filtered.filter(item => item.is_active == 1);
 
-        // } else if (searchTearm == 'In Active') {
-        //     filtered = filtered.filter(item => item.is_active == 0);
-        // }
         if (dateRange.startDate && dateRange.endDate) {
             const start = new Date(dateRange.startDate).setHours(0, 0, 0, 0);
             const end = new Date(dateRange.endDate).setHours(23, 59, 59, 999);
@@ -104,6 +101,12 @@ const Showcases = () => {
         document.querySelector('[data-bs-dismiss="modal"]').click();
 
     }
+
+    const handleView = (item) => {
+        setEditedData(item);
+        setIsView(true);
+    };
+
     return (
         <>
             {
@@ -117,16 +120,10 @@ const Showcases = () => {
 
                             <div className="table-content">
                                 <div className="content-header">
-                                    {/* <div className="search-align">
-                                        <img src="./images/search.svg" className="magnify" />
-                                        <input type="text" placeholder="Search User Name" className="search-content" onChange={(e) => setSearch(e.target.value)} />
-                                    </div> */}
                                     <SearchBox search={search} setSearch={setSearch} placeholder="Search Showcase" />
                                     <div className="content-right">
-                                        {/* <img className="datepicker" src="./images/datepicker.svg" /> */}
                                         <MyPicker handleDateFilter={handleRange} />
                                         <a href="#"
-                                            // style="text-decoration: none;"
                                             style={{
                                                 textDecoration: 'none'
                                             }}
@@ -136,10 +133,9 @@ const Showcases = () => {
                                                 justifyContent: 'center',
                                                 gap: "6px"
                                             }}
-                                            // style="width: auto; justify-content: center; gap: 6px;"
                                             onClick={handleOpenCloseCate}
                                         >
-                                                    <img src="./images/white-plus.svg" className="template" alt='plus icon' /> Category Manager
+                                                <img src="./images/white-plus.svg" className="template" alt='plus icon' /> Category Manager
                                             </button></a>
                                         <button type="button" className="template-upload"
                                             style={{
@@ -148,7 +144,10 @@ const Showcases = () => {
                                                 gap: '6px'
                                             }}
                                             // style="width: auto; justify-content: center; gap: 6px;"
-                                            data-bs-toggle="modal" data-bs-target="#uploadTemplateModal" onClick={() => setEditedData(null)}>
+                                            data-bs-toggle="modal" data-bs-target="#uploadTemplateModal" onClick={() => {
+                                                setEditedData(null);
+                                                setIsView(false);
+                                            }}>
                                             <img src="./images/white-plus.svg" className="template" alt='plus icon' /> Add Showcase
                                         </button>
                                     </div>
@@ -167,6 +166,7 @@ const Showcases = () => {
                                                     <th className="table-expand">Title</th>
                                                     <th className="table-expand">Category</th>
                                                     <th className="table-expand">Date Added</th>
+                                                    <th>View</th>
                                                     <th className="table-expand">Action</th>
                                                 </tr>
                                             </thead>
@@ -179,6 +179,16 @@ const Showcases = () => {
                                                                 <td className="tutorials-data">{item?.title}</td>
                                                                 <td>{item?.category?.category_name}</td>
                                                                 <td className="main-cat">{formatDateUSA(item.createdAt)}</td>
+                                                                <td className="eye-td">
+                                                                    <button
+                                                                        className="view-link bg-transparent border-0"
+                                                                        onClick={() => handleView(item)}
+                                                                        data-bs-toggle="modal"
+                                                                        data-bs-target="#uploadTemplateModal"
+                                                                    >
+                                                                        View <img src="./images/solid-eye.svg" className="eye-img" alt="View" />
+                                                                    </button>
+                                                                </td>
                                                                 <td>
                                                                     {/* Edit Button */}
                                                                     <img
@@ -187,7 +197,10 @@ const Showcases = () => {
                                                                         style={{ display: 'inline-block', cursor: 'pointer' }}
                                                                         data-bs-toggle="modal"
                                                                         data-bs-target="#uploadTemplateModal"
-                                                                        onClick={() => setEditedData(item)} // Fill modal with selected item
+                                                                        onClick={() => {
+                                                                            setEditedData(item);
+                                                                            setIsView(false);
+                                                                        }}
                                                                         alt="Edit Icon"
                                                                     />
 
@@ -224,18 +237,6 @@ const Showcases = () => {
                                         itemsPerPage={itemsPerPage}
                                         onPageChange={setCurrentPage}
                                     />
-
-                                    {/* <div className="pagination">
-                                        <button>&laquo;</button>
-                                        <button>&lt;</button>
-                                        <button className="active">1</button>
-                                        <button>2</button>
-                                        <button>3</button>
-                                        <button>...</button>
-                                        <button>10</button>
-                                        <button>&gt;</button>
-                                        <button>&raquo;</button>
-                                    </div> */}
                                 </div>
                             </div>
 
@@ -244,11 +245,12 @@ const Showcases = () => {
                 )
             }
 
-            <AddEditShowcases initialData={editedData} onSubmit={handleSubmit} />
+            <AddEditShowcases initialData={editedData} onSubmit={handleSubmit} isView={isView} />
             <DeleteModal
                 onClose={handleClose}
                 onConfirm={handleDelete}
                 type={'showcase'}
+
             />
         </>
     )

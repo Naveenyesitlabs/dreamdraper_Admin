@@ -13,11 +13,7 @@ const AddEditShowcases = ({ initialData = null, onSubmit }) => {
     const [uploadedFile, setUploadedFile] = useState(null);
 
     useEffect(() => {
-        if (initialData?.file) {
-            setUploadedFile({ name: initialData.file });
-        } else {
-            setUploadedFile(null);
-        }
+        setUploadedFile(null);
     }, [initialData]);
 
     const [tutorialCate, setTutorialCate] = useState([])
@@ -113,6 +109,71 @@ const AddEditShowcases = ({ initialData = null, onSubmit }) => {
         // onReset();
     };
 
+    // ---------------- File Type Detection ----------------
+
+    const getFileType = (fileSrc) => {
+        if (uploadedFile) return uploadedFile.type;
+
+        if (!fileSrc) return '';
+
+        const ext = fileSrc.split('.').pop().toLowerCase();
+
+        if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) return 'image/*';
+        if (['mp4', 'webm'].includes(ext)) return 'video/mp4';
+
+        return '';
+    };
+
+    // ---------------- Preview ----------------
+    console.log("checkintialvaluess", initialData?.imageURL)
+    const renderFilePreview = () => {
+        let fileSrc = null;
+
+        // ✅ if new file uploaded
+        if (uploadedFile instanceof File) {
+            fileSrc = URL.createObjectURL(uploadedFile);
+        }
+        // ✅ if edit mode (existing file URL)
+        else if (initialData?.imageURL) {
+            fileSrc = initialData.imageURL;
+        }
+
+        if (!fileSrc) return null;
+
+        const fileType = uploadedFile?.type || getFileType(fileSrc);
+
+        if (fileType?.startsWith("image/")) {
+            return (
+                <img
+                    src={fileSrc}
+                    alt="preview"
+                    style={{
+                        width: "100%",
+                        height: "140px",
+                        objectFit: "cover",
+                        borderRadius: "8px"
+                    }}
+                />
+            );
+        }
+
+        if (fileType?.startsWith("video/")) {
+            return (
+                <video
+                    src={fileSrc}
+                    controls
+                    style={{
+                        width: "100%",
+                        height: "140px",
+                        objectFit: "cover",
+                        borderRadius: "8px"
+                    }}
+                />
+            );
+        }
+
+        return <p style={{ fontSize: "12px" }}>Preview not available</p>;
+    };
     return (
         <div className="modal fade" id="uploadTemplateModal" tabIndex="-1" aria-hidden="true">
             <div className="modal-dialog modal-dialog-centered modal-lg" style={{ width: '462px' }}>
@@ -174,13 +235,10 @@ const AddEditShowcases = ({ initialData = null, onSubmit }) => {
                                 <div className="invalid-feedback">{formik.errors.category_id}</div>
                             )}
                         </div>
-
-                        {/* File Upload */}
                         <div
                             className="upload-section"
                             onDragOver={(e) => e.preventDefault()}
                             onDrop={handleFileDrop}
-
                         >
                             <p className="upload-heading">Upload File</p>
 
@@ -191,36 +249,42 @@ const AddEditShowcases = ({ initialData = null, onSubmit }) => {
                                 onChange={handleFileChange}
                             />
 
-                            <label htmlFor="uploadDesignInput" className="upload-template-label">
-                                <img src="./images/browse.svg" alt="upload" /><br />
-                                <p className="upload-txt">Click to browse or drag and drop your file</p>
-                            </label>
-
-                            {formik.touched.file && formik.errors.file && (
-                                <div className="invalid-feedback d-block">{formik.errors.file}</div>
-                            )}
+                            <div
+                                className="upload-template-label"
+                                style={{
+                                    border: "1px dashed #ccc",
+                                    padding: "10px",
+                                    borderRadius: "10px",
+                                    textAlign: "center"
+                                }}
+                            >
+                                {uploadedFile || initialData?.imageURL ? (
+                                    renderFilePreview()
+                                ) : (
+                                    <label htmlFor="uploadDesignInput" style={{ cursor: "pointer" }}>
+                                        <img src="./images/browse.svg" alt="upload" /><br />
+                                        <p>Click or drag file</p>
+                                    </label>
+                                )}
+                            </div>
                         </div>
 
-                        {/* Uploaded File Preview */}
-                        {uploadedFile && (
+                        {(uploadedFile instanceof File || initialData?.imageURL) && (
                             <div className="uploaded-content">
                                 <div className="upload-text-another">
                                     <img src="./images/file.svg" className="fil-uploaded" alt='file icon' />
-                                    <p className="uploaded-txt">{uploadedFile.name}</p>
+
+                                    <p className="uploaded-txt">
+                                        {uploadedFile instanceof File
+                                            ? uploadedFile.name
+                                            : initialData?.file || "Existing file"}
+                                    </p>
                                 </div>
+
                                 <div className="upload-text-another">
-                                    {/* <button type="button" className="image-size" style={{ cursor: "default", width: '75px' }}>
-                                        {uploadedFile && (() => {
-                                            const sizeInKB = uploadedFile.size / 1024;
-                                            if (sizeInKB < 1024) {
-                                                return `${sizeInKB.toFixed(0)} KB`;
-                                            } else {
-                                                const sizeInMB = sizeInKB / 1024;
-                                                return `${sizeInMB.toFixed(2)} MB`;
-                                            }
-                                        })()}
-                                    </button> */}
-                                    {uploadedFile.size && (
+
+                                    {/* ✅ Show size ONLY for new upload */}
+                                    {uploadedFile instanceof File && (
                                         <button
                                             type="button"
                                             className="image-size"
@@ -238,6 +302,7 @@ const AddEditShowcases = ({ initialData = null, onSubmit }) => {
                                         </button>
                                     )}
 
+                                    {/* ✅ Remove works for both */}
                                     <img
                                         src="./images/blue-cross.svg"
                                         className="blue-cross"
@@ -248,7 +313,6 @@ const AddEditShowcases = ({ initialData = null, onSubmit }) => {
                                 </div>
                             </div>
                         )}
-
                         {/* Description */}
                         <div>
                             <p className="upload-content-heading">Description</p>
