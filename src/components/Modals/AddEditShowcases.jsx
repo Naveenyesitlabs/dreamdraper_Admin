@@ -162,7 +162,7 @@ const AddEditShowcases = ({ initialData = null, onSubmit }) => {
                                 onChange={formik.handleChange}
                                 onBlur={formik.handleBlur}
                             >
-                                <option value="">Select Showcase category</option> {/* default placeholder */}
+                                <option value="">Select Showcase Category</option> {/* default placeholder */}
                                 {tutorialCate.map(t => (
                                     <option key={t.id} value={t.id}>
                                         {t.category_name}
