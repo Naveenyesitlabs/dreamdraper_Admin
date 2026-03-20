@@ -76,6 +76,83 @@ const AddEditForm = ({ initialValues = null, onSubmit }) => {
 
     });
 
+
+    const getFileType = (fileSrc) => {
+        if (fileData) return fileData.type;
+
+        if (!fileSrc) return '';
+
+        const ext = fileSrc.split('.').pop().toLowerCase();
+
+        if (ext === 'pdf') return 'application/pdf';
+        if (['mp4', 'webm'].includes(ext)) return 'video/mp4';
+        if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) return 'image/*';
+
+        return '';
+    };
+
+    const renderFilePreview = () => {
+        const fileSrc = fileData
+            ? URL.createObjectURL(fileData)
+            : existingFile?.url;
+
+        if (!fileSrc) return null;
+
+        const fileType = getFileType(fileSrc);
+
+        if (fileType === "application/pdf") {
+            return (
+                <iframe
+                    src={fileSrc}
+                    title="PDF Preview"
+                    style={{
+                        width: "100%",
+                        height: "140px",
+                        border: "none",
+                        borderRadius: "8px"
+                    }}
+                />
+            );
+        }
+
+        if (fileType.startsWith("video/")) {
+            return (
+                <video
+                    src={fileSrc}
+                    controls
+                    style={{
+                        width: "100%",
+                        height: "140px",
+                        borderRadius: "8px",
+                        objectFit: "cover"
+                    }}
+                />
+            );
+        }
+
+        if (fileType.startsWith("image/")) {
+            return (
+                <img
+                    src={fileSrc}
+                    alt="preview"
+                    style={{
+                        width: "100%",
+                        height: "140px",
+                        borderRadius: "8px",
+                        objectFit: "cover"
+                    }}
+                />
+            );
+        }
+
+        return <p style={{ fontSize: "12px" }}>Preview not available</p>;
+    };
+
+    const handleRemoveFile = () => {
+        setFileData(null);
+    };
+
+
     return (
         <div className="modal fade" id="addmeasuringform" tabIndex="-1" aria-hidden="true">
             <div className="modal-dialog modal-dialog-centered modal-lg" style={{ width: '462px' }}>
@@ -112,7 +189,7 @@ const AddEditForm = ({ initialValues = null, onSubmit }) => {
                         </div>
 
                         {/* File Upload */}
-                        <div className="upload-section">
+                        {/* <div className="upload-section">
                             <p className="upload-heading">Upload File</p>
 
                             <input
@@ -137,7 +214,6 @@ const AddEditForm = ({ initialValues = null, onSubmit }) => {
                                 </p>
                             </label>
 
-                            {/* View existing file (edit mode only, no replacement yet) */}
                             {existingFile && !fileData && (
                                 <p style={{ fontSize: '12px', marginTop: '6px' }}>
                                     <a
@@ -149,8 +225,56 @@ const AddEditForm = ({ initialValues = null, onSubmit }) => {
                                     </a>
                                 </p>
                             )}
-                        </div>
+                        </div> */}
 
+                        <div className="upload-section">
+                            <p className="upload-heading">Upload File</p>
+
+                            <input
+                                type="file"
+                                id="uploadDesignInput"
+                                hidden
+                                onChange={(e) => setFileData(e.target.files[0])}
+                            />
+
+                            <div
+                                className="upload-template-label"
+                                style={{
+                                    padding: "10px",
+                                    border: "1px dashed #ccc",
+                                    borderRadius: "10px",
+                                    textAlign: "center"
+                                }}
+                            >
+                                {fileData || existingFile ? (
+                                    <>
+                                        {renderFilePreview()}
+
+
+                                    </>
+                                ) : (
+                                    <label htmlFor="uploadDesignInput" style={{ cursor: "pointer" }}>
+                                        <img src="./images/browse.svg" alt="upload" /><br />
+                                        <p className="upload-txt" style={{ cursor: "pointer", width: "100%" }}>
+                                            Click to browse or drag file
+                                        </p>
+                                    </label>
+                                )}
+                            </div>
+                            {fileData && (
+                                <button
+                                    type="button"
+                                    onClick={handleRemoveFile}
+                                    style={{
+                                        marginTop: "8px",
+                                        fontSize: "12px",
+                                        cursor: "pointer"
+                                    }}
+                                >
+                                    Remove
+                                </button>
+                            )}
+                        </div>
 
                         {/* Description */}
                         <div>

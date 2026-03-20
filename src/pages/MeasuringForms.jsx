@@ -22,6 +22,9 @@ const MeasuringForms = () => {
     const [selectedItem, setSelectedItem] = useState(null)
     const [filteredData, setFilteredData] = useState([])
     const [currentPage, setCurrentPage] = useState(1);
+    const [measuringFormData, setMeasuringFormData] = useState(null);
+    const [isView, setIsView] = useState(false);
+
     const itemsPerPage = 10;
 
 
@@ -49,8 +52,9 @@ const MeasuringForms = () => {
     }
 
     const handleClose = () => {
-        setSelectedItem(null);
-    };
+        setSelectedItem(null)
+        setIsView(false)
+    }
 
     const handleDelete = async () => {
         try {
@@ -90,6 +94,11 @@ const MeasuringForms = () => {
     const handleRange = (startDate, endDate) => {
         setDateRange({ startDate, endDate });
     };
+
+    const handleView = (item) => {
+        setSelectedItem(item)
+        setIsView(true)
+    }
 
     return (
         <>
@@ -141,6 +150,7 @@ const MeasuringForms = () => {
                                                 }}
                                             >Description</th>
                                             <th className="table-expand">Date Added</th>
+                                            <th>View</th>
                                             <th className="table-expand"
                                                 style={{
                                                     width: '115px'
@@ -157,6 +167,16 @@ const MeasuringForms = () => {
                                                     <td className="main-cat">${item.price}</td>
                                                     <td className="main-cat">{item.description}</td>
                                                     <td className="nested-cat">{formatDateUSA(item.createdAt) || "-"}</td>
+                                                    <td className="eye-td">
+                                                        <button
+                                                            className="view-link bg-transparent border-0"
+                                                            onClick={() => handleView(item)}
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#addmeasuringform"
+                                                        >
+                                                            View <img src="./images/solid-eye.svg" className="eye-img" alt="View" />
+                                                        </button>
+                                                    </td>
                                                     <td>
                                                         <img
                                                             src="./images/editsolid.svg"
@@ -202,7 +222,8 @@ const MeasuringForms = () => {
 
                 </div>
             </div>
-            <AddEditForm initialValues={selectedItem} onSubmit={handleSubmit} />
+            <AddEditForm initialValues={selectedItem} onSubmit={handleSubmit} onReset={handleClose}
+                isView={isView} />
             <DeleteModal
                 onClose={handleClose}
                 onConfirm={handleDelete}
