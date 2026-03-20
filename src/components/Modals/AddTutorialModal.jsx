@@ -87,16 +87,6 @@ const AddTutorialModal = ({ initialData = null, onSubmit, onReset }) => {
         };
     };
 
-    // const formatDuration = (seconds) => {
-    //     const hrs = Math.floor(seconds / 3600);
-    //     const mins = Math.floor((seconds % 3600) / 60);
-    //     const secs = Math.floor(seconds % 60);
-    //     const hh = String(hrs).padStart(2, '0');
-    //     const mm = String(mins).padStart(2, '0');
-    //     const ss = String(secs).padStart(2, '0');
-    //     return `${hh}:${mm}:${ss}`;
-    // };
-
     const formatDuration = (seconds) => {
         const hrs = Math.floor(seconds / 3600);
         const mins = Math.floor((seconds % 3600) / 60);
@@ -142,6 +132,82 @@ const AddTutorialModal = ({ initialData = null, onSubmit, onReset }) => {
         setUploadedFile(null);
         onReset();
     };
+
+    // ---------------- File Type Detection ----------------
+
+    const getFileType = (fileSrc) => {
+        if (uploadedFile) return uploadedFile.type;
+
+        if (!fileSrc) return '';
+
+        const ext = fileSrc.split('.').pop().toLowerCase();
+
+        if (ext === 'pdf') return 'application/pdf';
+        if (['mp4', 'webm'].includes(ext)) return 'video/mp4';
+        if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) return 'image/*';
+
+        return '';
+    };
+
+    // ---------------- Preview ----------------
+
+    const renderFilePreview = () => {
+        const fileSrc = uploadedFile
+            ? URL.createObjectURL(uploadedFile)
+            : initialData?.fileUrl;
+
+        if (!fileSrc) return null;
+
+        const fileType = getFileType(fileSrc);
+
+        if (fileType === "application/pdf") {
+            return (
+                <iframe
+                    src={fileSrc}
+                    title="PDF Preview"
+                    style={{
+                        width: "100%",
+                        height: "140px",
+                        border: "none",
+                        borderRadius: "8px"
+                    }}
+                />
+            );
+        }
+
+        if (fileType.startsWith("video/")) {
+            return (
+                <video
+                    src={fileSrc}
+                    controls
+                    style={{
+                        width: "100%",
+                        height: "140px",
+                        borderRadius: "8px",
+                        objectFit: "cover"
+                    }}
+                />
+            );
+        }
+
+        if (fileType.startsWith("image/")) {
+            return (
+                <img
+                    src={fileSrc}
+                    alt="preview"
+                    style={{
+                        width: "100%",
+                        height: "140px",
+                        borderRadius: "8px",
+                        objectFit: "cover"
+                    }}
+                />
+            );
+        }
+
+        return <p style={{ fontSize: "12px" }}>Preview not available</p>;
+    };
+
 
     return (
         <div className="modal fade" id="uploadTutorialModal" tabIndex="-1" aria-hidden="true">
@@ -211,7 +277,6 @@ const AddTutorialModal = ({ initialData = null, onSubmit, onReset }) => {
                             className="upload-section"
                             onDragOver={(e) => e.preventDefault()}
                             onDrop={handleFileDrop}
-
                         >
                             <p className="upload-heading">Upload File</p>
 
@@ -222,13 +287,36 @@ const AddTutorialModal = ({ initialData = null, onSubmit, onReset }) => {
                                 onChange={handleFileChange}
                             />
 
-                            <label htmlFor="uploadDesignInput" className="upload-template-label">
-                                <img src="./images/browse.svg" alt="upload" /><br />
-                                <p className="upload-txt">Click to browse or drag and drop your file</p>
-                            </label>
+                            <div className="upload-template-label" style={{
+                                padding: "10px",
+                                border: "1px dashed #ccc",
+                                borderRadius: "10px",
+                                textAlign: "center"
+                            }}>
+                                {uploadedFile || initialData?.fileUrl ? (
+                                    <>
+                                        {/* Preview */}
+                                        {renderFilePreview()}
 
+                                        {/* Remove button (only for new upload) */}
+
+                                    </>
+                                ) : (
+                                    <label htmlFor="uploadDesignInput" style={{ cursor: "pointer", }}>
+                                        <img src="./images/browse.svg" alt="upload" /><br />
+                                        <p className="upload-txt" style={{ cursor: "pointer", width: "100%" }}>
+                                            Click to browse or drag and drop your file
+                                        </p>
+                                    </label>
+                                )}
+
+                            </div>
+
+                            {/* Validation Error (ALWAYS OUTSIDE CONDITION) */}
                             {formik.touched.tutorial && formik.errors.tutorial && (
-                                <div className="invalid-feedback d-block">{formik.errors.tutorial}</div>
+                                <div className="invalid-feedback d-block">
+                                    {formik.errors.tutorial}
+                                </div>
                             )}
                         </div>
 
@@ -261,7 +349,8 @@ const AddTutorialModal = ({ initialData = null, onSubmit, onReset }) => {
                             </div>
                         )}
 
-                        {/* Duration */}
+
+                        {/* /* Duration */}
                         <div>
                             <p className="upload-content-heading">Duration/Length</p>
                             <input
@@ -305,12 +394,12 @@ const AddTutorialModal = ({ initialData = null, onSubmit, onReset }) => {
                                 Cancel
                             </button>
                             <button type="submit" className="uploadSubmit"
-                               data-bs-dismiss={!Object.values(formik.errors).some(err => err) ? "modal" : undefined}
+                                data-bs-dismiss={!Object.values(formik.errors).some(err => err) ? "modal" : undefined}
                             >
                                 {isEdit ? 'Update Tutorial' : 'Add Tutorial'}
                             </button>
                         </div>
-                        
+
                     </form>
                 </div>
             </div>
