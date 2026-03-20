@@ -209,17 +209,6 @@ const AddEditShowcases = ({ initialData = null, onSubmit }) => {
                                     <p className="uploaded-txt">{uploadedFile.name}</p>
                                 </div>
                                 <div className="upload-text-another">
-                                    {/* <button type="button" className="image-size" style={{ cursor: "default", width: '75px' }}>
-                                        {uploadedFile && (() => {
-                                            const sizeInKB = uploadedFile.size / 1024;
-                                            if (sizeInKB < 1024) {
-                                                return `${sizeInKB.toFixed(0)} KB`;
-                                            } else {
-                                                const sizeInMB = sizeInKB / 1024;
-                                                return `${sizeInMB.toFixed(2)} MB`;
-                                            }
-                                        })()}
-                                    </button> */}
                                     {uploadedFile.size && (
                                         <button
                                             type="button"
