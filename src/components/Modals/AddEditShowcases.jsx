@@ -83,7 +83,7 @@ const AddEditShowcases = ({ initialData = null, onSubmit }) => {
             const modal = window.bootstrap.Modal.getInstance(document.getElementById('uploadTemplateModal'));
             modal.hide();
             // if (isEdit) onReset();
-            
+
         },
     });
 
@@ -162,7 +162,7 @@ const AddEditShowcases = ({ initialData = null, onSubmit }) => {
                                 onChange={formik.handleChange}
                                 onBlur={formik.handleBlur}
                             >
-                                <option value="">Select tutorial Category</option> {/* default placeholder */}
+                                <option value="">Select Showcase category</option> {/* default placeholder */}
                                 {tutorialCate.map(t => (
                                     <option key={t.id} value={t.id}>
                                         {t.category_name}

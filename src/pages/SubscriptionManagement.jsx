@@ -36,7 +36,7 @@ const SubscriptionManagement = () => {
     // }
 
     const handleSubmit = async (values) => {
-        console.log("values######", values);
+
 
         if (values.id) {
             // EDIT MODE
