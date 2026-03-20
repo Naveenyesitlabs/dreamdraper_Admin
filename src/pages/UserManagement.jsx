@@ -71,18 +71,18 @@ const UserManagement = () => {
         setCurrentPage(1)
     }, [allUser, search, searchTearm, dateRange]);
 
-// ----New----
+    // ----New----
     useEffect(() => {
         const handleClickOutside = (event) => {
             const dropdown = document.querySelector(".dropdown");
-    
+
             if (dropdown && !dropdown.contains(event.target)) {
                 setIsDropdownOpen(false);
             }
         };
-    
+
         document.addEventListener("mousedown", handleClickOutside);
-    
+
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
@@ -179,7 +179,7 @@ const UserManagement = () => {
                                     </div>
                                     {isDropdownOpen && (
                                         // <div className="menu" id="dropdownMenu" style={{ zIndex: 7 }}>
-                                        <div className="menu" style={{display: "block", zIndex: 7 }}>
+                                        <div className="menu" style={{ display: "block", zIndex: 7 }}>
                                             {
                                                 searchTearm !== '' && (<div onClick={() => { setSearchTearm(''); setIsDropdownOpen(false); }} style={{
                                                     color: '#98999c'
@@ -207,6 +207,8 @@ const UserManagement = () => {
                                             <th className="table-expand">Username</th>
                                             <th className="table-expand">Email ID</th>
                                             <th className="table-expand">Phone Number</th>
+                                            <th className="table-expand">Address</th>
+                                            <th className="table-expand">State</th>
                                             <th className="table-expand">Joined Date</th>
                                             <th className="table-expand">Status</th>
                                             <th className="table-expand">Action</th>
@@ -227,6 +229,8 @@ const UserManagement = () => {
                                                     <td>{user.username || "N/A"}</td>
                                                     <td>{user.email || "N/A"}</td>
                                                     <td>{user.phone || "N/A"}</td>
+                                                    <td>{user.address || "N/A"}</td>
+                                                    <td>{user.state || "N/A"}</td>
                                                     <td>{formatDateUSA(user.createdAt) || "06-10-2025"}</td>
                                                     <td>
                                                         <button
