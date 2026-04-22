@@ -163,6 +163,11 @@ const TemplateModal = ({ initialData = null, onSubmit, onReset, isEdit, isView }
     formik.setFieldValue("designe", file);
     setUploadedFile(file);
     setExistingFileUrl(null); // remove old preview when new file selected
+
+    // 👉 Auto-fill Design Name from file name (remove extension)
+    const fileName = file.name.replace(/\.[^/.]+$/, "");
+
+    formik.setFieldValue("designe_name", fileName);
   };
 
 
