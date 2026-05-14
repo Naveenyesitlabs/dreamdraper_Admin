@@ -32,12 +32,12 @@ const LibraryManagement = () => {
         let filtered = Array.isArray(allTemplateData) ? [...allTemplateData] : [];
         if (search) {
             const term = search.toLowerCase();
-            filtered = filtered.filter(item =>
-                item?.designe_name?.toLowerCase().includes(term)
-                || item?.category?.category_name?.toLowerCase().includes(term)
-                || item?.subCategory?.sub_category_name?.toLowerCase().includes(term)
-                || item?.nestedCategory?.nested_category_name?.toLowerCase().includes(term)
-                || item?.subNestedCategory?.sub_nested_category_name?.toLowerCase().includes(term)
+            filtered = filtered.filter((item) =>
+                (item?.designe_name || "").toLowerCase().includes(term)
+                || (item?.category?.category_name || "").toLowerCase().includes(term)
+                || (item?.subCategory?.sub_category_name || "").toLowerCase().includes(term)
+                || (item?.nestedCategory?.nested_category_name || "").toLowerCase().includes(term)
+                || (item?.subNestedCategory?.sub_nested_category_name || "").toLowerCase().includes(term)
             );
         }
         if (dateRange.startDate && dateRange.endDate) {
@@ -198,13 +198,13 @@ const LibraryManagement = () => {
                                                 </td>
                                             </tr>
                                         ) : currentItems && currentItems.length > 0 ? (
-                                            currentItems.map((item, index) => (
+                                            currentItems?.map((item, index) => (
                                                 <tr key={item.id}>
                                                     <td>{startIndex + index + 1}</td>
-                                                    <td className="tempName">{item.designe_name}</td>
-                                                    <td className="desc-text">{item.description}</td>
-                                                    <td className="main-cat">{item.category.category_name || "N/A"}</td>
-                                                    <td className="main-cat">{item.subCategory.sub_category_name || "N/A"}</td>
+                                                    <td className="tempName">{item?.designe_name}</td>
+                                                    <td className="desc-text">{item?.description}</td>
+                                                    <td className="main-cat">{item?.category?.category_name || "N/A"}</td>
+                                                    <td className="main-cat">{item?.subCategory?.sub_category_name || "N/A"}</td>
                                                     <td className="nested-cat">{item?.nestedCategory?.nested_category_name || "N/A"}</td>
                                                     <td className="nested-cat">{item?.subNestedCategory?.sub_nested_category_name || "N/A"}</td>
                                                     <td>{formatDateUSA(item.createdAt)}</td>

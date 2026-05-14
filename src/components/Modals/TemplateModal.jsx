@@ -116,7 +116,7 @@ const TemplateModal = ({ initialData = null, onSubmit, onReset, isEdit, isView }
     validationSchema: Yup.object({
       designe_name: Yup.string().required("Design Name is required"),
       category_id: Yup.string().required("Main Category is required"),
-      subCategory_id: Yup.string().required("Sub-Category is required"),
+      // subCategory_id: Yup.string().required("Sub-Category is required"),
       // nestedCategory_id: Yup.string().required("Nested Category is required"),
       // subNestedCategory_id: Yup.string().required("Sub-Nested Category is required"),
       nestedCategory_id: Yup.string().nullable(),

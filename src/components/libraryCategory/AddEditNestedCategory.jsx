@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux';
 import * as Yup from 'yup';
 import { allCategory, allSubCategory } from '../../redux/admin/slices/libraryCategorySlice';
 
-const AddEditNestedCategory = ({ initialData = null, onSubmit, onReset, isEdit}) => {
+const AddEditNestedCategory = ({ initialData = null, onSubmit, onReset, isEdit }) => {
     const hasFetched = useRef(false);
     const dispatch = useDispatch()
     // const isEdit = Boolean(initialData);
@@ -184,7 +184,7 @@ const AddEditNestedCategory = ({ initialData = null, onSubmit, onReset, isEdit})
                                 type="submit"
                                 className="add-category-save"
                                 disabled={formik.isSubmitting}
-                                //  data-bs-dismiss="modal"
+                            //  data-bs-dismiss="modal"
                             >
                                 {isEdit ? 'Update' : 'Submit'}
                             </button>

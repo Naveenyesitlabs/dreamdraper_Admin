@@ -7,12 +7,14 @@ const AddEditCategory = ({ initialData = null, onSubmit, onReset }) => {
         initialValues: {
             id: initialData?.id || "",
             categoryName: initialData?.category_name || "",
+            design_type: initialData?.design_type || "",
         },
         validationSchema: Yup.object({
             categoryName: Yup.string()
                 .trim()
                 .required("Category name is required")
                 .max(50, "Category name must be under 50 characters"),
+            design_type: Yup.string().required("Design type is required"),
         }),
         onSubmit: (values, { resetForm }) => {
             onSubmit(values, isEdit);
@@ -77,6 +79,33 @@ const AddEditCategory = ({ initialData = null, onSubmit, onReset }) => {
                                 {formik.touched.categoryName && formik.errors.categoryName && (
                                     <div className="invalid-feedback d-block">
                                         {formik.errors.categoryName}
+                                    </div>
+                                )}
+                            </div>
+                            <div className="mb-3">
+                                <label htmlFor="designType" className="form-label category-name">
+                                    Design Type
+                                </label>
+
+                                <select
+                                    className={`category-input ${formik.touched.design_type && formik.errors.design_type
+                                        ? "is-invalid"
+                                        : ""
+                                        }`}
+                                    id="designType"
+                                    name="design_type"
+                                    value={formik.values.design_type}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                >
+                                    <option value="">Select Design Type</option>
+                                    <option value="2D">2D</option>
+                                    <option value="3D">3D</option>
+                                </select>
+
+                                {formik.touched.design_type && formik.errors.design_type && (
+                                    <div className="invalid-feedback d-block">
+                                        {formik.errors.design_type}
                                     </div>
                                 )}
                             </div>

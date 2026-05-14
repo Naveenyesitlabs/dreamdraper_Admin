@@ -154,6 +154,7 @@ const MainCategory = () => {
                                             <th className="profile-pic">Name</th>
                                             <th className="table-expand">Created</th>
                                             <th className="table-expand">Status</th>
+                                            <th className="table-expand">Design Type</th>
                                             <th className="table-expand">Action</th>
                                         </tr>
                                     </thead>
@@ -189,6 +190,16 @@ const MainCategory = () => {
                                                             onClick={() => setSelectedCategory(item)}
                                                         >
                                                             {item.is_active === 1 ? "Active" : "Inactive"}
+                                                        </button>
+                                                    </td>
+                                                    <td>
+                                                        <button
+                                                            className="status-btn-library"
+                                                            // data-bs-toggle="modal"
+                                                            // data-bs-target="#activateTemplateModal"
+                                                            style={{ background: "rgb(215 179 62)" }}
+                                                        >
+                                                            {item.design_type || "-"}
                                                         </button>
                                                     </td>
                                                     <td>
