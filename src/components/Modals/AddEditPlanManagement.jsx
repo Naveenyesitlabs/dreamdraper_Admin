@@ -434,44 +434,69 @@
 // export default AddEditPlanManagement;
 
 // __________________________________________________________________________________________________________________
-import { useEffect, useRef } from 'react'
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { useDispatch, useSelector } from 'react-redux'
-import { getPlans } from '../../redux/admin/slices/planSlices'
+
+const normalizeFeatures = (features) => {
+    if (Array.isArray(features)) {
+        return features
+            .map((feature) => String(feature).replace(/^•\s*/, "").trim())
+            .filter(Boolean);
+    }
+
+    if (typeof features !== "string") {
+        return [];
+    }
+
+    const trimmedFeatures = features.trim();
+
+    if (!trimmedFeatures) {
+        return [];
+    }
+
+    try {
+        const parsedFeatures = JSON.parse(trimmedFeatures);
+
+        if (Array.isArray(parsedFeatures)) {
+            return parsedFeatures
+                .map((feature) => String(feature).replace(/^•\s*/, "").trim())
+                .filter(Boolean);
+        }
+    } catch {
+        // Fall back to plain text parsing when features is not valid JSON.
+    }
+
+    return trimmedFeatures
+        .replace(/^\[|\]$/g, "")
+        .split(/\r?\n|,/)
+        .map((feature) => feature.replace(/^['"\s]*•?\s*/, "").replace(/['"\s]*$/g, "").trim())
+        .filter(Boolean);
+};
+
+const formatFeaturesForTextarea = (features) =>
+    normalizeFeatures(features).map((feature) => `• ${feature}`).join("\n");
 
 const AddEditPlanManagement = ({ initialData = null, onSubmit }) => {
-
-    const dispatch = useDispatch();
-    const hasFetched = useRef(false);
     const isEdit = Boolean(initialData);
 
-    const { allPlans } = useSelector((state) => state.plans);
-
-    useEffect(() => {
-        if (hasFetched.current) return;
-        hasFetched.current = true;
-        dispatch(getPlans())
-    }, [dispatch])
-
-    const storageType = initialData?.is_storeage ?? 0;
-
-    const filteredPlans = (allPlans || []).filter(
-        (plan) => Number(plan.is_storeage) === Number(storageType)
-    );
-
     const initialValues = {
-        plan_id: initialData?.id || "",
+        plan_id: initialData?.plan_id || initialData?.id || "",
         plan_name: initialData?.plan_name || "",
-        features: initialData?.features
-            ? initialData.features.map(f => `• ${f}`).join("\n")
-            : "",
+        features: formatFeaturesForTextarea(initialData?.features),
         duraction: initialData?.duraction || "",
         price: initialData?.price || "",
+        is_storeage: String(Number(initialData?.is_storeage ?? 0)),
+        quantaty: initialData?.quantaty || "",
+        storage_unit: initialData?.storage_unit || "",
         is_active: initialData ? Boolean(Number(initialData?.is_active)) : true,
     };
 
     const validationSchema = Yup.object({
+        ...(isEdit && {
+            plan_id: Yup.number()
+                .typeError("Plan ID must be a number")
+                .required("Plan ID is required"),
+        }),
         plan_name: Yup.string().required("Plan name is required"),
         features: Yup.string().required("Features are required"),
         duraction: Yup.string().required("Duration is required"),
@@ -479,25 +504,51 @@ const AddEditPlanManagement = ({ initialData = null, onSubmit }) => {
             .typeError("Price must be a number")
             .min(0, "Price cannot be negative")
             .required("Price is required"),
+        is_storeage: Yup.string().required("Plan type is required"),
+        quantaty: Yup.number()
+            .typeError("Quantaty must be a number")
+            .min(0, "Quantaty cannot be negative")
+            .required("Quantaty is required"),
+        storage_unit: Yup.string().required("Storage unit is required"),
     });
 
-    const handleSubmit = (values, { resetForm }) => {
-
+    const handleSubmit = async (values, { resetForm, setSubmitting }) => {
         const payload = {
-            ...values,
-            features: values.features
-                ? values.features
-                    .split("\n")
-                    .map(f => f.replace(/^•\s*/, "").trim())
-                    .filter(f => f !== "")
-                : [],
+            plan_name: values.plan_name.trim(),
+            duraction: values.duraction.trim(),
+            price: Number(values.price),
+            is_storeage: Number(values.is_storeage),
+            quantaty: Number(values.quantaty),
+            storage_unit: values.storage_unit.trim(),
+            features: normalizeFeatures(values.features),
             is_active: values.is_active ? 1 : 0,
-            ...(isEdit && { id: initialData.id }),
+            ...(isEdit && values.plan_id !== "" ? { plan_id: Number(values.plan_id) } : {}),
         };
 
-        onSubmit(payload);
+        try {
+            await onSubmit(payload);
 
-        if (!isEdit) resetForm();
+            if (!isEdit) {
+                resetForm();
+            }
+
+            const modalElement = document.getElementById("addplan");
+            const closeButton = modalElement?.querySelector(".cross-dropdown");
+
+            if (closeButton instanceof HTMLElement) {
+                closeButton.click();
+            } else if (modalElement && window.bootstrap?.Modal) {
+                let modal = window.bootstrap.Modal.getInstance(modalElement);
+
+                if (!modal) {
+                    modal = new window.bootstrap.Modal(modalElement);
+                }
+
+                modal.hide();
+            }
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     const errorStyle = {
@@ -531,9 +582,27 @@ const AddEditPlanManagement = ({ initialData = null, onSubmit }) => {
                         onSubmit={handleSubmit}
                         enableReinitialize
                     >
-                        {({ setFieldValue }) => (
+                        {() => (
 
                             <Form className="upload-dropdowns">
+
+                                {isEdit && (
+                                    <div>
+                                        <p className="upload-content-heading">Plan ID</p>
+
+                                        <Field
+                                            name="plan_id"
+                                            type="number"
+                                            placeholder="e.g. 13"
+                                            className="upload-content-input"
+                                        />
+
+                                        <ErrorMessage
+                                            name="plan_id"
+                                            render={(msg) => <div style={errorStyle}>{msg}</div>}
+                                        />
+                                    </div>
+                                )}
 
                                 {/* Plan Name */}
                                 <div>
@@ -560,7 +629,7 @@ const AddEditPlanManagement = ({ initialData = null, onSubmit }) => {
                                         as="textarea"
                                         name="features"
                                         className="upload-content-textarea"
-                                        disabled
+                                        placeholder="Add one feature per line"
                                     />
 
                                     <ErrorMessage
@@ -574,58 +643,97 @@ const AddEditPlanManagement = ({ initialData = null, onSubmit }) => {
                                     <p className="upload-content-heading">Select Plan</p>
 
                                     <Field
-                                        as="select"
-                                        name="plan_id"
+                                        name="duraction"
+                                        type="text"
                                         className="upload-content-input"
-                                        onChange={(e) => {
-
-                                            const selectedId = Number(e.target.value);
-
-                                            setFieldValue("plan_id", selectedId);
-
-                                            const selectedPlan = filteredPlans.find(
-                                                (plan) => plan.id === selectedId
-                                            );
-
-                                            if (selectedPlan) {
-
-                                                const featureText = selectedPlan.features
-                                                    ?.map(f => `• ${f}`)
-                                                    .join("\n");
-
-                                                setFieldValue("features", featureText || "");
-                                                setFieldValue("price", selectedPlan.price);
-                                                setFieldValue("duraction", selectedPlan.duraction);
-                                                setFieldValue("plan_name", selectedPlan.plan_name);
-                                            }
-
-                                        }}
-                                    >
-                                        {/* <option value="">Select Plan</option> */}
-
-                                        {filteredPlans.map((plan) => (
-                                            <option key={plan.id} value={plan.id}>
-                                                {plan.plan_name} ({plan.duraction})
-                                            </option>
-                                        ))}
-                                    </Field>
-                                </div>
-
-                                {/* Price */}
-                                <div>
-                                    <p className="upload-content-heading">Monthly Price ($)</p>
-
-                                    <Field
-                                        name="price"
-                                        type="number"
-                                        placeholder="0"
-                                        className="number-input"
+                                        placeholder="e.g. month"
                                     />
 
                                     <ErrorMessage
-                                        name="price"
+                                        name="duraction"
                                         render={(msg) => <div style={errorStyle}>{msg}</div>}
                                     />
+                                </div>
+
+                                <div style={{ display: "flex", gap: "18px" }}>
+                                    <div style={{ flex: 1 }}>
+                                        <p className="upload-content-heading">Monthly Price ($)</p>
+
+                                        <Field
+                                            name="price"
+                                            type="number"
+                                            placeholder="0"
+                                            className="number-input"
+                                            style={{ width: "100%" }}
+                                        />
+
+                                        <ErrorMessage
+                                            name="price"
+                                            render={(msg) => <div style={errorStyle}>{msg}</div>}
+                                        />
+                                    </div>
+
+                                    <div style={{ flex: 1 }}>
+                                        <p className="upload-content-heading">Plan Type</p>
+
+                                        <Field
+                                            name="is_storeage"
+                                            as="select"
+                                            className="upload-content-input"
+                                        >
+                                            <option value="">Select plan type</option>
+                                            <option value="1">Storage</option>
+                                            <option value="0">Platform</option>
+                                        </Field>
+
+                                        <ErrorMessage
+                                            name="is_storeage"
+                                            render={(msg) => <div style={errorStyle}>{msg}</div>}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div
+                                    className="plan-storage-row"
+                                    style={{ display: "flex", gap: "18px" }}
+                                >
+                                    <div className="plan-storage-field" style={{ flex: 1 }}>
+                                        <p className="upload-content-heading">Quantaty</p>
+
+                                        <Field
+                                            name="quantaty"
+                                            type="number"
+                                            placeholder="e.g. 10"
+                                            className="number-input plan-storage-input"
+                                            style={{ width: "100%" }}
+                                        />
+
+                                        <ErrorMessage
+                                            name="quantaty"
+                                            render={(msg) => <div style={errorStyle}>{msg}</div>}
+                                        />
+                                    </div>
+
+                                    <div className="plan-storage-field" style={{ flex: 1 }}>
+                                        <p className="upload-content-heading">Storage Unit</p>
+
+                                        <Field
+                                            name="storage_unit"
+                                            as="select"
+                                            className="upload-content-input plan-storage-input"
+                                            style={{ width: "100%" }}
+                                        >
+                                            <option value="">Select storage unit</option>
+                                            <option value="MB">MB</option>
+                                            <option value="GB">GB</option>
+                                            <option value="TB">TB</option>
+                                        </Field>
+
+                                        <ErrorMessage
+                                            name="storage_unit"
+                                            render={(msg) => <div style={errorStyle}>{msg}</div>}
+                                        />
+                                    </div>
                                 </div>
 
                                 {/* Active Toggle */}
@@ -670,7 +778,6 @@ const AddEditPlanManagement = ({ initialData = null, onSubmit }) => {
                                     <button
                                         type="submit"
                                         className="uploadSubmit"
-                                        data-bs-dismiss="modal"
                                     >
                                         {isEdit ? "Update" : "Submit"}
                                     </button>

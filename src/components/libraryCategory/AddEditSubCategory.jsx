@@ -9,6 +9,14 @@ const AddEditSubCategory = ({ initialData = null, onSubmit, onReset, isEdit }) =
     // const isEdit = Boolean(initialData);
     const dispatch = useDispatch();
     const [category, setCategory] = useState([])
+
+    const getCategoryOptionLabel = (item) => {
+        const designType = item?.design_type || "";
+        const categoryName = item?.category_name || "";
+
+        return designType ? `${designType} - ${categoryName}` : categoryName;
+    };
+
     const formik = useFormik({
         initialValues: {
             id: initialData?.id || "",
@@ -104,7 +112,7 @@ const AddEditSubCategory = ({ initialData = null, onSubmit, onReset, isEdit }) =
                                         {category?.length > 0 &&
                                             category.map((item, index) => (
                                                 <option key={index} value={item?.id}>
-                                                    {item?.category_name} {/* Replace 'name' with your category field */}
+                                                    {getCategoryOptionLabel(item)}
                                                 </option>
                                             ))}
                                     </select>

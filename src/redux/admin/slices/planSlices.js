@@ -62,6 +62,20 @@ export const updatePlansDaitls = createAsyncThunk(
     }
 );
 
+export const removePlan = createAsyncThunk(
+    "admin/removePlan",
+    async (formData, { rejectWithValue }) => {
+        try {
+             await checkLogin()
+            const response = await api.deletePlans(formData);
+            console.log("response", response)
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data || error.message);
+        }
+    }
+);
+
 const plansSlice = createSlice({
     name: "plans",
     initialState: {
@@ -97,7 +111,7 @@ const plansSlice = createSlice({
             .addCase(addNewPlans.fulfilled, (state, action) => {
                 // state.allPlans = action.payload.data
                 state.loading = false;
-                // toast.success(action?.payload?.message || "Showcases category updated")
+                toast.success(action?.payload?.message || "Plan added successfully")
             })
             .addCase(addNewPlans.rejected, (state, action) => {
                 state.loading = false;
@@ -115,9 +129,26 @@ const plansSlice = createSlice({
             .addCase(updatePlansDaitls.fulfilled, (state, action) => {
                 // state.allPlans = action.payload.data
                 state.loading = false;
-                // toast.success(action?.payload?.message || "Showcases category updated")
+                toast.success(action?.payload?.message || "Plan updated successfully")
             })
             .addCase(updatePlansDaitls.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload || action.error.message;
+                if (action?.payload?.status == 403) {
+                    logouterror()
+                }
+                toast.error(action?.payload?.message)
+            });
+        builder
+            .addCase(removePlan.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(removePlan.fulfilled, (state, action) => {
+                state.loading = false;
+                toast.success(action?.payload?.message || "Plan deleted successfully")
+            })
+            .addCase(removePlan.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload || action.error.message;
                 if (action?.payload?.status == 403) {

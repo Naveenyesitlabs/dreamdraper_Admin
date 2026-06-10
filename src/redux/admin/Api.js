@@ -78,6 +78,7 @@ export const changeShowcases = (formData) => API.post('/admin/update-showcase', 
 //Plan Management
 export const featchAllPlans = () => API.get('/admin/all-plans')
 export const newPlans = (formData) => API.post('/admin/add-plan', formData)
+export const deletePlans = (formData) => API.post('/admin/delete-plan', formData)
 export const chagePlansDaitles = (formData) => API.post('/admin/update-plan', formData)
 
 // Subscribers

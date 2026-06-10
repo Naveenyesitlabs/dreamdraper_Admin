@@ -5,8 +5,8 @@ import AddEditPlanManagement from '../components/Modals/AddEditPlanManagement'
 import DeleteModal from '../components/Modals/DeleteModal'
 import ViewFeatures from '../components/ViewFeatures'
 import useTableSort from '../hooks/useTableSort'
-import { activeInActiveCategories, deleteDate } from '../redux/admin/slices/libraryCategorySlice'
-import { addNewPlans, getPlans, updatePlansDaitls } from '../redux/admin/slices/planSlices'
+import { activeInActiveCategories } from '../redux/admin/slices/libraryCategorySlice'
+import { addNewPlans, getPlans, removePlan, updatePlansDaitls } from '../redux/admin/slices/planSlices'
 
 const PlanManagement = () => {
     // table ref to apply sorting functionality
@@ -63,10 +63,15 @@ const PlanManagement = () => {
 
     const handleSubmit = async (values) => {
         console.log("values", values)
-        values.id ? await dispatch(updatePlansDaitls(values)) :
-            await dispatch(addNewPlans(values))
-        await dispatch(getPlans())
-        setSelectedData(null)
+        if (selectedData) {
+            await dispatch(updatePlansDaitls(values)).unwrap();
+        } else {
+            await dispatch(addNewPlans(values)).unwrap();
+        }
+
+        await dispatch(getPlans()).unwrap();
+        setSelectedData(null);
+        return true;
     }
     const handlePopup = () => {
         setSelectedData(null)
@@ -87,7 +92,9 @@ const PlanManagement = () => {
 
     const handleDelete = async () => {
         try {
-            await dispatch(deleteDate({ id: selectedData.id, type: 'plan' }))
+            await dispatch(removePlan({
+                plan_id: selectedData?.plan_id || selectedData?.id
+            }))
             await dispatch(getPlans())
             setSelectedData(null);
         } catch (error) {
@@ -109,17 +116,18 @@ const PlanManagement = () => {
                                 <input type="text" placeholder="Search plans" className="search-content" onChange={(e) => setSearch(e.target.value)} />
                             </div> */}
                             {/* <SearchBox search={search} setSearch={setSearch} /> */}
-                            {/* <div className="content-right">
-                                <MyPicker handleDateFilter={handleRange} />
-                                <button type="button" className="template-upload"
-                                    style={{
-                                        width: '142px'
-                                    }}
+                            <div className="content-right" style={{ marginLeft: "auto" }}>
+                                <button
+                                    type="button"
+                                    className="template-upload"
+                                    style={{ width: '110px' }}
                                     data-bs-toggle="modal"
-                                    data-bs-target="#addplan" onClick={handlePopup}>
-                                    <img src="./images/templateUpload.svg" className="template" alt='add icon' /> Add New Plan
-                                </button> 
-                            </div> */}
+                                    data-bs-target="#addplan"
+                                    onClick={handlePopup}
+                                >
+                                    <img src="./images/white-plus.svg" className="template" alt='plus icon' /> Add Plan
+                                </button>
+                            </div>
                         </div>
                         <div className="table-container">
                             <div className="scroll-table">
@@ -140,7 +148,7 @@ const PlanManagement = () => {
                                     <tbody>
                                         {loading ? (
                                             <tr>
-                                                <td colSpan="7" style={{ textAlign: "center" }}>
+                                                <td colSpan="8" style={{ textAlign: "center" }}>
                                                     Loading...
                                                 </td>
                                             </tr>
@@ -178,7 +186,7 @@ const PlanManagement = () => {
                                                         </a>
                                                     </td>
                                                     <td className="main-cat">
-                                                        {plan.plan_type || 0}
+                                                        {Number(plan.is_storeage) === 1 ? "Storage" : "Platform"}
                                                     </td>
                                                     <td>
                                                         {/* <button
@@ -217,21 +225,26 @@ const PlanManagement = () => {
                                                             alt="edit"
                                                             onClick={() => setSelectedData(plan)}
                                                         />
-                                                        {/* <img
-                                                            src="./images/del-solid.svg"
-                                                            className="icon-table"
+                                                        <button
+                                                            type='button'
+                                                            className='bg-transparent border-0'
                                                             data-bs-toggle="modal"
                                                             data-bs-target="#deleteDesign"
-                                                            style={{ display: "inline-block" }}
-                                                            alt="delete"
                                                             onClick={() => setSelectedData(plan)}
-                                                        /> */}
+                                                        >
+                                                            <img
+                                                                src="./images/del-solid.svg"
+                                                                className="icon-table"
+                                                                style={{ display: "inline-block" }}
+                                                                alt="delete"
+                                                            />
+                                                        </button>
                                                     </td>
                                                 </tr>
                                             ))
                                         ) : (
                                             <tr>
-                                                <td colSpan="7" style={{ textAlign: "center" }}>
+                                                <td colSpan="8" style={{ textAlign: "center" }}>
                                                     No plans found
                                                 </td>
                                             </tr>
