@@ -485,7 +485,7 @@ const AddEditPlanManagement = ({ initialData = null, onSubmit }) => {
         features: formatFeaturesForTextarea(initialData?.features),
         duraction: initialData?.duraction || "",
         price: initialData?.price || "",
-        is_storeage: String(Number(initialData?.is_storeage ?? 0)),
+        is_storeage: initialData ? String(Number(initialData?.is_storeage ?? 0)) : "",
         quantaty: initialData?.quantaty || "",
         storage_unit: initialData?.storage_unit || "",
         is_active: initialData ? Boolean(Number(initialData?.is_active)) : true,
@@ -499,27 +499,39 @@ const AddEditPlanManagement = ({ initialData = null, onSubmit }) => {
         }),
         plan_name: Yup.string().required("Plan name is required"),
         features: Yup.string().required("Features are required"),
-        duraction: Yup.string().required("Duration is required"),
+        duraction: Yup.string()
+            .oneOf(["month", "year"], "Please select Monthly or Yearly")
+            .required("Duration is required"),
         price: Yup.number()
             .typeError("Price must be a number")
             .min(0, "Price cannot be negative")
             .required("Price is required"),
         is_storeage: Yup.string().required("Plan type is required"),
-        quantaty: Yup.number()
-            .typeError("Quantaty must be a number")
-            .min(0, "Quantaty cannot be negative")
-            .required("Quantaty is required"),
-        storage_unit: Yup.string().required("Storage unit is required"),
+        quantaty: Yup.number().when("is_storeage", {
+            is: "1",
+            then: (schema) =>
+                schema
+                    .typeError("Quantity must be a number")
+                    .min(0, "Quantity cannot be negative")
+                    .required("Quantity is required"),
+            otherwise: (schema) => schema.nullable().notRequired(),
+        }),
+        storage_unit: Yup.string().when("is_storeage", {
+            is: "1",
+            then: (schema) => schema.required("Storage unit is required"),
+            otherwise: (schema) => schema.notRequired(),
+        }),
     });
 
     const handleSubmit = async (values, { resetForm, setSubmitting }) => {
+        const isStoragePlan = Number(values.is_storeage) === 1;
         const payload = {
             plan_name: values.plan_name.trim(),
             duraction: values.duraction.trim(),
             price: Number(values.price),
             is_storeage: Number(values.is_storeage),
-            quantaty: Number(values.quantaty),
-            storage_unit: values.storage_unit.trim(),
+            quantaty: isStoragePlan ? Number(values.quantaty) : 0,
+            storage_unit: isStoragePlan ? values.storage_unit.trim() : "",
             features: normalizeFeatures(values.features),
             is_active: values.is_active ? 1 : 0,
             ...(isEdit && values.plan_id !== "" ? { plan_id: Number(values.plan_id) } : {}),
@@ -582,7 +594,7 @@ const AddEditPlanManagement = ({ initialData = null, onSubmit }) => {
                         onSubmit={handleSubmit}
                         enableReinitialize
                     >
-                        {() => (
+                        {({ values, setFieldValue }) => (
 
                             <Form className="upload-dropdowns">
 
@@ -643,11 +655,14 @@ const AddEditPlanManagement = ({ initialData = null, onSubmit }) => {
                                     <p className="upload-content-heading">Select Plan</p>
 
                                     <Field
+                                        as="select"
                                         name="duraction"
-                                        type="text"
                                         className="upload-content-input"
-                                        placeholder="e.g. month"
-                                    />
+                                    >
+                                        <option value="">Select Plan</option>
+                                        <option value="month">Monthly</option>
+                                        <option value="year">Yearly</option>
+                                    </Field>
 
                                     <ErrorMessage
                                         name="duraction"
@@ -657,7 +672,7 @@ const AddEditPlanManagement = ({ initialData = null, onSubmit }) => {
 
                                 <div style={{ display: "flex", gap: "18px" }}>
                                     <div style={{ flex: 1 }}>
-                                        <p className="upload-content-heading">Monthly Price ($)</p>
+                                        <p className="upload-content-heading">Subscription Price ($)</p>
 
                                         <Field
                                             name="price"
@@ -680,6 +695,15 @@ const AddEditPlanManagement = ({ initialData = null, onSubmit }) => {
                                             name="is_storeage"
                                             as="select"
                                             className="upload-content-input"
+                                            onChange={(e) => {
+                                                const { value } = e.target;
+                                                setFieldValue("is_storeage", value);
+
+                                                if (value === "0") {
+                                                    setFieldValue("quantaty", "");
+                                                    setFieldValue("storage_unit", "");
+                                                }
+                                            }}
                                         >
                                             <option value="">Select plan type</option>
                                             <option value="1">Storage</option>
@@ -693,48 +717,50 @@ const AddEditPlanManagement = ({ initialData = null, onSubmit }) => {
                                     </div>
                                 </div>
 
-                                <div
-                                    className="plan-storage-row"
-                                    style={{ display: "flex", gap: "18px" }}
-                                >
-                                    <div className="plan-storage-field" style={{ flex: 1 }}>
-                                        <p className="upload-content-heading">Quantaty</p>
+                                {values.is_storeage === "1" && (
+                                    <div
+                                        className="plan-storage-row"
+                                        style={{ display: "flex", gap: "18px" }}
+                                    >
+                                        <div className="plan-storage-field" style={{ flex: 1 }}>
+                                            <p className="upload-content-heading">Quantity</p>
 
-                                        <Field
-                                            name="quantaty"
-                                            type="number"
-                                            placeholder="e.g. 10"
-                                            className="number-input plan-storage-input"
-                                            style={{ width: "100%" }}
-                                        />
+                                            <Field
+                                                name="quantaty"
+                                                type="number"
+                                                placeholder="e.g. 10"
+                                                className="number-input plan-storage-input"
+                                                style={{ width: "100%" }}
+                                            />
 
-                                        <ErrorMessage
-                                            name="quantaty"
-                                            render={(msg) => <div style={errorStyle}>{msg}</div>}
-                                        />
+                                            <ErrorMessage
+                                                name="quantaty"
+                                                render={(msg) => <div style={errorStyle}>{msg}</div>}
+                                            />
+                                        </div>
+
+                                        <div className="plan-storage-field" style={{ flex: 1 }}>
+                                            <p className="upload-content-heading">Storage Unit</p>
+
+                                            <Field
+                                                name="storage_unit"
+                                                as="select"
+                                                className="upload-content-input plan-storage-input"
+                                                style={{ width: "100%" }}
+                                            >
+                                                <option value="">Select storage unit</option>
+                                                <option value="MB">MB</option>
+                                                <option value="GB">GB</option>
+                                                <option value="TB">TB</option>
+                                            </Field>
+
+                                            <ErrorMessage
+                                                name="storage_unit"
+                                                render={(msg) => <div style={errorStyle}>{msg}</div>}
+                                            />
+                                        </div>
                                     </div>
-
-                                    <div className="plan-storage-field" style={{ flex: 1 }}>
-                                        <p className="upload-content-heading">Storage Unit</p>
-
-                                        <Field
-                                            name="storage_unit"
-                                            as="select"
-                                            className="upload-content-input plan-storage-input"
-                                            style={{ width: "100%" }}
-                                        >
-                                            <option value="">Select storage unit</option>
-                                            <option value="MB">MB</option>
-                                            <option value="GB">GB</option>
-                                            <option value="TB">TB</option>
-                                        </Field>
-
-                                        <ErrorMessage
-                                            name="storage_unit"
-                                            render={(msg) => <div style={errorStyle}>{msg}</div>}
-                                        />
-                                    </div>
-                                </div>
+                                )}
 
                                 {/* Active Toggle */}
                                 <div className="active-plan">
