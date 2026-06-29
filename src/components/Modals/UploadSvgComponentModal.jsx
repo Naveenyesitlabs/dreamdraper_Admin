@@ -221,7 +221,7 @@ const UploadSvgComponentModal = ({
 
           <form className="upload-dropdowns" onSubmit={formik.handleSubmit}>
             <div className="upload-section">
-              <p className="upload-heading">Upload Thumbnail</p>
+              <p className="upload-content-heading mb-2">Upload Thumbnail</p>
 
               <input
                 type="file"
