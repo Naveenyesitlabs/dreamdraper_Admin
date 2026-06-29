@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import ActiveAndInActiveModal from '../components/Modals/ActiveAndInActiveModal'
 import DeleteModal from '../components/Modals/DeleteModal'
 import TemplateModal from '../components/Modals/TemplateModal'
+import UploadSvgComponentModal from '../components/Modals/UploadSvgComponentModal'
 import MyPicker from '../components/commanComponents/MyPicker'
 import Pagination from '../components/commanComponents/Pagination'
 import SearchBox from '../components/table/SearchBox'
@@ -66,7 +67,7 @@ const LibraryManagement = () => {
         }
     }, [allTemplate])
 
-    const handleSubmit = async (values, isEdit) => {
+    const handleSubmit = async (values, isEdit, modalId) => {
         try {
             const formData = new FormData();
             formData.append("designe_name", values.designe_name);
@@ -79,19 +80,17 @@ const LibraryManagement = () => {
             formData.append("price", values.price);
 
             if (values.designe) formData.append("designe", values.designe);
+            if (values.svg_component) formData.append("svg_component", values.svg_component);
             if (values.id) formData.append('id', values.id)
 
             isEdit ? await dispatch(updateTemplateDesigne(formData)) : await dispatch(addNewTemplate(formData))
             await dispatch(getAllTemplate())
 
-            // document.querySelector('[data-bs-dismiss="modal"]')?.click();
-            // Find and click the Cancel button which has data-bs-dismiss="modal"
-            const cancelButton = document.querySelector('.uploadCancel[data-bs-dismiss="modal"]');
+            const cancelButton = document.querySelector(`#${modalId} .uploadCancel[data-bs-dismiss="modal"]`);
             if (cancelButton) {
                 cancelButton.click();
             }
 
-            // Call handleClose to reset states
             handleClose();
         } catch (error) {
             console.log("error from library page", error)
@@ -121,6 +120,7 @@ const LibraryManagement = () => {
     const handleClose = () => {
         setSelectedTemplate(null)
         setIsEditData(false)
+        setIsView(false)
     }
 
     const totalItems = filteredData?.length;
@@ -166,6 +166,15 @@ const LibraryManagement = () => {
                                     onClick={() => { setIsView(false); setIsEditData(false); setSelectedTemplate(null) }}
                                 >
                                     <img src="./images/templateUpload.svg" className="template" alt="upload icon" /> Upload Template
+                                </button>
+                                <button
+                                    type="button"
+                                    className="template-upload"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#uploadSvgComponentModal"
+                                    onClick={() => { setIsView(false); setIsEditData(false); setSelectedTemplate(null) }}
+                                >
+                                    <img src="./images/templateUpload.svg" className="template" alt="upload icon" /> Upload SVG Component
                                 </button>
                             </div>
                         </div>
@@ -287,6 +296,12 @@ const LibraryManagement = () => {
                 onReset={handleClose}
                 isEdit={isEditData}
                 isView={isView}
+                modalId="uploadTemplateModal"
+            />
+            <UploadSvgComponentModal
+                onSubmit={handleSubmit}
+                onReset={handleClose}
+                modalId="uploadSvgComponentModal"
             />
             <ActiveAndInActiveModal
                 onClose={handleClose}

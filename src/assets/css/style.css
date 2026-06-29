@@ -1484,6 +1484,93 @@
   display: none;
 }
 
+.upload-preview-filled {
+  position: relative;
+  padding: 0;
+  overflow: hidden;
+  background: #eef2f7;
+  display: block;
+}
+
+.upload-preview-filled:hover,
+.upload-preview-filled:focus {
+  background: #eef2f7;
+}
+
+.upload-preview-full-image {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none;
+  max-height: none;
+  display: block;
+}
+
+.upload-template-label .upload-preview-full-image {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.upload-preview-full-image-thumbnail {
+  object-fit: cover;
+}
+
+.upload-preview-full-image-svg {
+  object-fit: fill;
+}
+
+.upload-preview-overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  background: linear-gradient(180deg, rgba(9, 66, 113, 0) 0%, rgba(9, 66, 113, 0.82) 100%);
+}
+
+.upload-preview-file-name {
+  margin: 0;
+  color: #fff;
+  font-family: 'Segoe UI';
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.upload-preview-remove {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.upload-preview-remove-side {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+}
+
+.upload-preview-remove img {
+  width: 16px;
+  height: 16px;
+}
+
 .upload-txt {
   font-family: 'Segoe UI';
   font-weight: 400;
