@@ -8,6 +8,7 @@ import AddEditCategory from '../../components/libraryCategory/AddEditCategory'
 import SearchBox from '../../components/table/SearchBox'
 import useTableSort from '../../hooks/useTableSort'
 import { activeInActiveCategories, addCategory, deleteDate, getCategory, UpdateCategory } from '../../redux/admin/slices/libraryCategorySlice'
+import { formatComponentTypeLabel } from '../../utils/healper/componentTypeHelper'
 import { formatDateUSA } from '../../utils/healper/dateHelper'
 
 const MainCategory = () => {
@@ -199,7 +200,7 @@ const MainCategory = () => {
                                                             // data-bs-target="#activateTemplateModal"
                                                             style={{ background: "rgb(215 179 62)" }}
                                                         >
-                                                            {item.design_type || "-"}
+                                                            {formatComponentTypeLabel(item.design_type) || "-"}
                                                         </button>
                                                     </td>
                                                     <td>

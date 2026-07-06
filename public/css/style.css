@@ -355,7 +355,7 @@
 }
 
 .status-btn-library {
-  width: 59px;
+  /* width: 59px; */
   height: 26px;
   gap: 10px;
   angle: 0 deg;

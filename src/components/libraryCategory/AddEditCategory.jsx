@@ -1,5 +1,6 @@
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import { DESIGN_LIBRARY_2D, DESIGN_LIBRARY_3D, MATERIALS_TEXTURES_2D, MATERIALS_TEXTURES_3D, normalizeComponentType } from "../../utils/healper/componentTypeHelper";
 
 const AddEditCategory = ({ initialData = null, onSubmit, onReset }) => {
     const isEdit = Boolean(initialData);
@@ -7,7 +8,7 @@ const AddEditCategory = ({ initialData = null, onSubmit, onReset }) => {
         initialValues: {
             id: initialData?.id || "",
             categoryName: initialData?.category_name || "",
-            design_type: initialData?.design_type || "",
+            design_type: normalizeComponentType(initialData?.design_type),
         },
         validationSchema: Yup.object({
             categoryName: Yup.string()
@@ -99,8 +100,10 @@ const AddEditCategory = ({ initialData = null, onSubmit, onReset }) => {
                                     onBlur={formik.handleBlur}
                                 >
                                     <option value="">Select Design Type</option>
-                                    <option value="2D">2D</option>
-                                    <option value="3D">3D</option>
+                                    <option value={MATERIALS_TEXTURES_2D}>{MATERIALS_TEXTURES_2D}</option>
+                                    <option value={MATERIALS_TEXTURES_3D}>{MATERIALS_TEXTURES_3D}</option>
+                                    <option value={DESIGN_LIBRARY_2D}>{DESIGN_LIBRARY_2D}</option>
+                                    <option value={DESIGN_LIBRARY_3D}>{DESIGN_LIBRARY_3D}</option>
                                 </select>
 
                                 {formik.touched.design_type && formik.errors.design_type && (

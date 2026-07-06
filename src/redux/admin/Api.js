@@ -54,6 +54,7 @@ export const getAllSubNested = (formData) => API.post('/admin/sub-nested-categor
 export const featchAllTemplate = () => API.get('/admin/all-designe');
 export const addTemplate = (formData) => API.post('/admin/upload-new-designe', formData)
 export const updateTemplate = (formData) => API.post('/admin/update-template', formData)
+export const uploadGlbImage = (formData) => API.post('/add-image/upload-glb', formData)
 
 // project manager
 export const getUserByProject = () => API.get('/admin/users')

@@ -257,6 +257,45 @@ export const updateTemplateDesigne = createAsyncThunk(
     }
 );
 
+export const deleteLibraryTemplate = createAsyncThunk(
+    "admin/deleteLibraryTemplate",
+    async (id, { rejectWithValue }) => {
+        const templateTypes = ["template_designe", "template_design", "designe"];
+
+        try {
+            await checkLogin();
+
+            let lastError = null;
+
+            for (const type of templateTypes) {
+                try {
+                    const response = await api.deleteCustomCategory({ id, type });
+                    return response.data;
+                } catch (error) {
+                    lastError = error;
+                }
+            }
+
+            throw lastError;
+        } catch (error) {
+            return rejectWithValue(error?.response?.data || error?.message || "Unable to delete template");
+        }
+    }
+);
+
+export const uploadGlbComponent = createAsyncThunk(
+    "admin/uploadGlbComponent",
+    async (formData, { rejectWithValue }) => {
+        try {
+            await checkLogin()
+            const response = await api.uploadGlbImage(formData);
+            return response.data
+        } catch (error) {
+            return rejectWithValue(error.response?.data || error.message);
+        }
+    }
+);
+
 
 
 const libraryCategorySlice = createSlice({
@@ -603,6 +642,44 @@ const libraryCategorySlice = createSlice({
                 toast.success(action?.payload?.message)
             })
             .addCase(updateTemplateDesigne.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload || action.error.message;
+                if (action?.payload?.status == 403) {
+                    logouterror()
+                }
+                toast.error(action?.payload?.message)
+            });
+
+        builder
+            .addCase(deleteLibraryTemplate.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(deleteLibraryTemplate.fulfilled, (state, action) => {
+                state.loading = false;
+                console.log("action", action?.payload?.data);
+                toast.success(action?.payload?.message || "Template deleted successfully");
+            })
+            .addCase(deleteLibraryTemplate.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload || action.error.message;
+                if (action?.payload?.status == 403) {
+                    logouterror()
+                }
+                toast.error(action?.payload?.message || "Unable to delete template");
+            });
+
+        builder
+            .addCase(uploadGlbComponent.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(uploadGlbComponent.fulfilled, (state, action) => {
+                state.loading = false;
+                console.log("action", action?.payload?.data);
+                toast.success(action?.payload?.message)
+            })
+            .addCase(uploadGlbComponent.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload || action.error.message;
                 if (action?.payload?.status == 403) {

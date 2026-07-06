@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import * as Yup from 'yup';
 import { allCategory } from '../../redux/admin/slices/libraryCategorySlice';
+import { formatComponentTypeLabel } from '../../utils/healper/componentTypeHelper';
 
 const AddEditSubCategory = ({ initialData = null, onSubmit, onReset, isEdit }) => {
     const hasFetched = useRef(false);
@@ -11,7 +12,7 @@ const AddEditSubCategory = ({ initialData = null, onSubmit, onReset, isEdit }) =
     const [category, setCategory] = useState([])
 
     const getCategoryOptionLabel = (item) => {
-        const designType = item?.design_type || "";
+        const designType = formatComponentTypeLabel(item?.design_type);
         const categoryName = item?.category_name || "";
 
         return designType ? `${designType} - ${categoryName}` : categoryName;

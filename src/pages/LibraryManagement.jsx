@@ -8,7 +8,8 @@ import MyPicker from '../components/commanComponents/MyPicker'
 import Pagination from '../components/commanComponents/Pagination'
 import SearchBox from '../components/table/SearchBox'
 import useTableSort from '../hooks/useTableSort'
-import { activeInActiveCategories, addNewTemplate, deleteDate, getAllTemplate, updateTemplateDesigne } from '../redux/admin/slices/libraryCategorySlice'
+import { activeInActiveCategories, addNewTemplate, deleteLibraryTemplate, getAllTemplate, updateTemplateDesigne, uploadGlbComponent } from '../redux/admin/slices/libraryCategorySlice'
+import { is3DComponentType } from '../utils/healper/componentTypeHelper'
 import { formatDateUSA } from '../utils/healper/dateHelper'
 
 
@@ -67,9 +68,41 @@ const LibraryManagement = () => {
         }
     }, [allTemplate])
 
+    const closeModalById = (modalId) => {
+        const modalElement = document.getElementById(modalId);
+        const modalInstance = window.bootstrap?.Modal?.getInstance(modalElement);
+
+        if (modalInstance) {
+            modalInstance.hide();
+            return;
+        }
+
+        const dismissTrigger = modalElement?.querySelector('[data-bs-dismiss="modal"]');
+        if (dismissTrigger) {
+            dismissTrigger.click();
+        }
+    };
+
     const handleSubmit = async (values, isEdit, modalId) => {
         try {
+            if (modalId === "uploadSvgComponentModal" && is3DComponentType(values.component_type)) {
+                const glbFormData = new FormData();
+                if (values.designe) glbFormData.append("glb", values.designe);
+                glbFormData.append("name", values.designe_name || "");
+                glbFormData.append("category_id", values.category_id || "");
+                glbFormData.append("subCategory_id", values.subCategory_id || "");
+                glbFormData.append("nestedCategory_id", values.nestedCategory_id || "");
+                glbFormData.append("subNestedCategory_id", values.subNestedCategory_id || "");
+                glbFormData.append("component_type", values.component_type || "");
+
+                await dispatch(uploadGlbComponent(glbFormData))
+                closeModalById(modalId);
+                handleClose();
+                return true;
+            }
+
             const formData = new FormData();
+            if (values.component_type) formData.append("component_type", values.component_type);
             formData.append("designe_name", values.designe_name);
             formData.append("category_id", values.category_id);
             formData.append("subCategory_id", values.subCategory_id);
@@ -85,23 +118,22 @@ const LibraryManagement = () => {
 
             isEdit ? await dispatch(updateTemplateDesigne(formData)) : await dispatch(addNewTemplate(formData))
             await dispatch(getAllTemplate())
-
-            const cancelButton = document.querySelector(`#${modalId} .uploadCancel[data-bs-dismiss="modal"]`);
-            if (cancelButton) {
-                cancelButton.click();
-            }
-
+            closeModalById(modalId);
             handleClose();
+            return true;
         } catch (error) {
             console.log("error from library page", error)
+            return false;
         }
     }
 
     const handleDelete = async () => {
+        if (!selectedTemplate?.id) return;
+
         try {
-            await dispatch(deleteDate({ id: selectedTemplate.id, type: 'template_designe' }))
-            await dispatch(getAllTemplate())
-            setSelectedTemplate(null);
+            await dispatch(deleteLibraryTemplate(selectedTemplate.id)).unwrap();
+            await dispatch(getAllTemplate());
+            handleClose();
         } catch (error) {
             console.log("error from library page", error)
         }
