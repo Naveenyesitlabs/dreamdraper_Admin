@@ -60,7 +60,7 @@ export default function App() {
     <Router>
       <SidebarProvider>
         <ToastContainer
-          autoClose={1500} 
+          autoClose={1500}
           hideProgressBar={false}
           pauseOnHover={true}
           newestOnTop={false}

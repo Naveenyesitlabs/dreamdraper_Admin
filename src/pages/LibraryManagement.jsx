@@ -114,6 +114,17 @@ const LibraryManagement = () => {
 
             if (values.designe) formData.append("designe", values.designe);
             if (values.svg_component) formData.append("svg_component", values.svg_component);
+            if (values.fabric_meta) {
+                const meta = values.fabric_meta;
+                if (meta.scale !== undefined) formData.append("scale", meta.scale);
+                if (meta.repeatWidth !== undefined) formData.append("repeatWidth", meta.repeatWidth);
+                if (meta.repeatHeight !== undefined) formData.append("repeatHeight", meta.repeatHeight);
+                if (meta.offset !== undefined) formData.append("offset", typeof meta.offset === "string" ? meta.offset : JSON.stringify(meta.offset));
+                if (meta.height !== undefined) formData.append("height", meta.height);
+                if (meta.width !== undefined) formData.append("width", meta.width);
+                if (meta.x !== undefined) formData.append("x", meta.x);
+                if (meta.y !== undefined) formData.append("y", meta.y);
+            }
             if (values.id) formData.append('id', values.id)
 
             isEdit ? await dispatch(updateTemplateDesigne(formData)) : await dispatch(addNewTemplate(formData))

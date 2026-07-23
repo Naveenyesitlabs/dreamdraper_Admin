@@ -487,6 +487,7 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import * as Yup from "yup";
 import { allCategory, allSubCategory, getAllNestedCategory, getSubNestedCate } from "../../redux/admin/slices/libraryCategorySlice";
+import FabricSwatch from "./FabricSwatch";
 
 const TemplateModal = ({
   initialData = null,
@@ -507,6 +508,8 @@ const TemplateModal = ({
   const [subNestedCategories, setSubNestedCategories] = useState([]);
   const [selectedCate, setSelectedCate] = useState(null)
   const [selectedSubCate, setSelectedSubCate] = useState(null)
+  const [showFabricSwatch, setShowFabricSwatch] = useState(false);
+  const [fabricMeta, setFabricMeta] = useState(null);
 
   useEffect(() => {
     if (hasFetched.current) return;
@@ -602,6 +605,7 @@ const TemplateModal = ({
       price: initialData?.price ?? "",
       is_paid: initialData?.is_paid ?? false,
       designe: null,
+      fabric_meta: initialData?.fabric_meta ?? null,
     },
     validationSchema: Yup.object({
       designe_name: Yup.string().required("Design Name is required"),
@@ -630,6 +634,7 @@ const TemplateModal = ({
       onSubmit(values, isEdit, modalId);
       resetForm();
       setUploadedFile(null);
+      setFabricMeta(null);
       setSelectedSubCate(null)
       setSelectedCate(null)
       if (onReset) onReset();
@@ -705,8 +710,14 @@ const TemplateModal = ({
               )
               : (
                 <div className="upload-section">
-                  <p className="upload-heading">Upload File</p>
+                  <div className="imp-btn mb-2" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <p className="upload-heading">Upload File</p>
 
+                    <button type="button" className="" onClick={() => setShowFabricSwatch(true)}>
+                      Import Swatch
+                    </button>
+
+                  </div>
                   <input type="file" id={`${modalId}DesignInput`} hidden onChange={handleFileChange} disabled={isView} />
 
                   <label htmlFor={`${modalId}DesignInput`} className="upload-template-label">
@@ -946,6 +957,19 @@ const TemplateModal = ({
           </form>
         </div>
       </div >
+      {showFabricSwatch && (
+        <FabricSwatch
+          onClose={() => setShowFabricSwatch(false)}
+          onImport={(file, name, meta) => {
+            formik.setFieldValue("designe", file);
+            setUploadedFile(file);
+            formik.setFieldValue("designe_name", name || "");
+            formik.setFieldValue("fabric_meta", meta);
+            setFabricMeta(meta);
+            setShowFabricSwatch(false);
+          }}
+        />
+      )}
     </div >
   );
 };
