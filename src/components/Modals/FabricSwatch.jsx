@@ -1,71 +1,62 @@
 import React, { useEffect, useRef, useState } from "react";
 
-const FABRIC_VALUE_DPI = 6;
+// Client software's physical-size conversion: 7.5 image pixels represent one inch.
+const FABRIC_VALUE_DPI = 7.5;
+const round = (value) => Number(value.toFixed(2));
 
 const FabricSwatch = ({ onClose, onImport }) => {
-    // no redux dispatch needed here; parent may provide onImport
-
     const fileInputRef = useRef(null);
     const canvasRef = useRef(null);
-    const containerRef = useRef(null);
-
+    const imageFrameRef = useRef(null);
     const [imageObj, setImageObj] = useState(null);
     const [imageSrc, setImageSrc] = useState(null);
     const [selectedFile, setSelectedFile] = useState(null);
-
-    const [originalRepeatWidth, setOriginalRepeatWidth] = useState(null);
-    const [originalRepeatHeight, setOriginalRepeatHeight] = useState(null);
-
     const [selection, setSelection] = useState(null);
-    const [isDragging, setIsDragging] = useState(false);
-    const [startPoint, setStartPoint] = useState(null);
-
+    const [dragStart, setDragStart] = useState(null);
     const [displayScale, setDisplayScale] = useState(1);
-
+    const [baseRepeat, setBaseRepeat] = useState(null);
     const [repeatWidthIn, setRepeatWidthIn] = useState(10.75);
     const [repeatHeightIn, setRepeatHeightIn] = useState(12.5);
-
     const [scale, setScale] = useState(100);
     const [swatchName, setSwatchName] = useState("");
     const [preview, setPreview] = useState(null);
 
-    // ---------------- IMAGE UPLOAD ----------------
-
-    const updateFromScale = (newScale, img) => {
-        if (!originalRepeatWidth || !originalRepeatHeight) return;
-
-        const newWidth = (originalRepeatWidth * newScale) / 100;
-        const newHeight = (originalRepeatHeight * newScale) / 100;
-
-        setScale(parseFloat(newScale.toFixed(2)));
-        setRepeatWidthIn(parseFloat(newWidth.toFixed(2)));
-        setRepeatHeightIn(parseFloat(newHeight.toFixed(2)));
-
-        generateRepeatPreview(img, newScale, newWidth, newHeight);
+    const makePreview = (img, crop, scalePercent) => {
+        if (!img) return;
+        const source = crop || { x: 0, y: 0, width: img.width, height: img.height };
+        const factor = Math.max(0.01, (Number(scalePercent) || 100) / 100);
+        const tile = document.createElement("canvas");
+        tile.width = Math.max(1, Math.round(source.width * factor));
+        tile.height = Math.max(1, Math.round(source.height * factor));
+        tile.getContext("2d").drawImage(img, source.x, source.y, source.width, source.height, 0, 0, tile.width, tile.height);
+        const output = document.createElement("canvas");
+        output.width = 440; output.height = 240;
+        const ctx = output.getContext("2d");
+        ctx.fillStyle = ctx.createPattern(tile, "repeat");
+        ctx.fillRect(0, 0, output.width, output.height);
+        setPreview(output.toDataURL("image/jpeg", 0.92));
     };
 
-    const handleImageUpload = (e) => {
-        const file = e.target.files[0];
+    const setDimensionsFromScale = (nextScale, img = imageObj, crop = selection, base = baseRepeat) => {
+        if (!base) return;
+        const safeScale = Math.max(0.01, Number(nextScale) || 100);
+        setScale(round(safeScale));
+        setRepeatWidthIn(round(base.width * safeScale / 100));
+        setRepeatHeightIn(round(base.height * safeScale / 100));
+        makePreview(img, crop, safeScale);
+    };
+
+    const handleImageUpload = (event) => {
+        const file = event.target.files?.[0];
         if (!file) return;
-
-        setSelectedFile(file);
-
         const reader = new FileReader();
         reader.onload = () => {
             const img = new Image();
             img.onload = () => {
-                const fullWidthIn = img.width / FABRIC_VALUE_DPI;
-                const fullHeightIn = img.height / FABRIC_VALUE_DPI;
-
-                setImageObj(img);
-                setImageSrc(reader.result);
-                setSelection(null);
-                setOriginalRepeatWidth(fullWidthIn);
-                setOriginalRepeatHeight(fullHeightIn);
-                setScale(100);
-                setRepeatWidthIn(parseFloat(fullWidthIn.toFixed(3)));
-                setRepeatHeightIn(parseFloat(fullHeightIn.toFixed(3)));
-                generateRepeatPreview(img, 100, fullWidthIn, fullHeightIn);
+                setSelectedFile(file); setImageObj(img); setImageSrc(reader.result); setSelection(null);
+                const fullSize = { width: img.width / FABRIC_VALUE_DPI, height: img.height / FABRIC_VALUE_DPI };
+                setBaseRepeat(fullSize); setScale(100); setRepeatWidthIn(round(fullSize.width)); setRepeatHeightIn(round(fullSize.height));
+                makePreview(img, null, 100);
             };
             img.src = reader.result;
         };
@@ -73,440 +64,68 @@ const FabricSwatch = ({ onClose, onImport }) => {
         setSwatchName(file.name.replace(/\.[^/.]+$/, ""));
     };
 
-    // ---------------- DRAW CANVAS ----------------
     useEffect(() => {
         const canvas = canvasRef.current;
-        const container = containerRef.current;
-        if (!canvas || !imageObj || !container) return;
-
-        const ctx = canvas.getContext("2d");
-
-        const scaleFactor = Math.min(
-            container.clientWidth / imageObj.width,
-            container.clientHeight / imageObj.height
-        );
-
-        setDisplayScale(scaleFactor);
-
-        const w = imageObj.width * scaleFactor;
-        const h = imageObj.height * scaleFactor;
-
-        canvas.width = w;
-        canvas.height = h;
-
-        ctx.clearRect(0, 0, w, h);
-        ctx.drawImage(imageObj, 0, 0, w, h);
-
-        if (selection) {
-            ctx.strokeStyle = "black";
-            ctx.lineWidth = 1;
-            ctx.strokeRect(
-                selection.x * scaleFactor,
-                selection.y * scaleFactor,
-                selection.width * scaleFactor,
-                selection.height * scaleFactor
-            );
-        }
+        const frame = imageFrameRef.current;
+        if (!canvas || !imageObj || !frame) return;
+        const factor = Math.min(frame.clientWidth / imageObj.width, frame.clientHeight / imageObj.height);
+        setDisplayScale(factor); canvas.width = Math.round(imageObj.width * factor); canvas.height = Math.round(imageObj.height * factor);
+        const ctx = canvas.getContext("2d"); ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.drawImage(imageObj, 0, 0, canvas.width, canvas.height);
+        if (selection) { ctx.strokeStyle = "#111"; ctx.lineWidth = 1; ctx.strokeRect(selection.x * factor, selection.y * factor, selection.width * factor, selection.height * factor); }
     }, [imageObj, selection]);
 
-    // ---------------- DRAG SELECTION ----------------
-    const handleMouseDown = (e) => {
-        if (!imageObj) return;
+    const pointFromEvent = (event) => {
         const rect = canvasRef.current.getBoundingClientRect();
-        const x = (e.clientX - rect.left) / displayScale;
-        const y = (e.clientY - rect.top) / displayScale;
-        setStartPoint({ x, y });
-        setIsDragging(true);
+        return { x: Math.max(0, Math.min(imageObj.width, (event.clientX - rect.left) / displayScale)), y: Math.max(0, Math.min(imageObj.height, (event.clientY - rect.top) / displayScale)) };
     };
-
-    const handleMouseMove = (e) => {
-        if (!isDragging || !startPoint) return;
-
-        const rect = canvasRef.current.getBoundingClientRect();
-        const x = (e.clientX - rect.left) / displayScale;
-        const y = (e.clientY - rect.top) / displayScale;
-
-        const newSel = {
-            x: Math.min(startPoint.x, x),
-            y: Math.min(startPoint.y, y),
-            width: Math.abs(x - startPoint.x),
-            height: Math.abs(y - startPoint.y)
-        };
-
-        setSelection(newSel);
-
-        // 🔥 Update repeat dynamically from drag
-        const newWidthIn = newSel.width / FABRIC_VALUE_DPI;
-        const newHeightIn = newSel.height / FABRIC_VALUE_DPI;
-
-        setRepeatWidthIn(newWidthIn.toFixed(2));
-        setRepeatHeightIn(newHeightIn.toFixed(2));
+    const handleMouseDown = (event) => { if (imageObj) { setDragStart(pointFromEvent(event)); setSelection(null); } };
+    const handleMouseMove = (event) => {
+        if (!dragStart || !imageObj) return;
+        const point = pointFromEvent(event);
+        setSelection({ x: Math.min(dragStart.x, point.x), y: Math.min(dragStart.y, point.y), width: Math.abs(point.x - dragStart.x), height: Math.abs(point.y - dragStart.y) });
     };
-
     const handleMouseUp = () => {
-        setIsDragging(false);
-
-        if (imageObj && selection) {
-            const widthIn = selection.width / FABRIC_VALUE_DPI;
-            const heightIn = selection.height / FABRIC_VALUE_DPI;
-
-            setOriginalRepeatWidth(widthIn);
-            setOriginalRepeatHeight(heightIn);
-
-            setScale(100);
-            setRepeatWidthIn(parseFloat(widthIn.toFixed(2)));
-            setRepeatHeightIn(parseFloat(heightIn.toFixed(2)));
-
-            generateRepeatPreview(imageObj, 100, widthIn, heightIn);
-        }
+        if (!dragStart || !selection || selection.width < 1 || selection.height < 1) { setDragStart(null); return; }
+        const nextBase = { width: selection.width / FABRIC_VALUE_DPI, height: selection.height / FABRIC_VALUE_DPI };
+        setBaseRepeat(nextBase); setScale(100); setRepeatWidthIn(round(nextBase.width)); setRepeatHeightIn(round(nextBase.height)); makePreview(imageObj, selection, 100); setDragStart(null);
     };
-
-    const generateRepeatPreview = (img, scalePercent, rWidthIn, rHeightIn) => {
-        if (!img) return;
-
-        // 🔥 True repeat size in pixels (DO NOT SCALE THIS)
-        const repeatWidthPx = rWidthIn * FABRIC_VALUE_DPI;
-        const repeatHeightPx = rHeightIn * FABRIC_VALUE_DPI;
-
-        // Preview canvas (fixed UI size like client)
-        const previewCanvas = document.createElement("canvas");
-        const ctx = previewCanvas.getContext("2d");
-
-        previewCanvas.width = 600;
-        previewCanvas.height = 400;
-
-        // Tile canvas (real repeat size)
-        const tileCanvas = document.createElement("canvas");
-        tileCanvas.width = repeatWidthPx;
-        tileCanvas.height = repeatHeightPx;
-
-        const tctx = tileCanvas.getContext("2d");
-
-        // Draw selected repeat area
-        if (selection) {
-            tctx.drawImage(
-                img,
-                selection.x,
-                selection.y,
-                selection.width,
-                selection.height,
-                0,
-                0,
-                repeatWidthPx,
-                repeatHeightPx
-            );
-        } else {
-            tctx.drawImage(
-                img,
-                0,
-                0,
-                repeatWidthPx,
-                repeatHeightPx
-            );
-        }
-
-        // Create repeat pattern
-        const pattern = ctx.createPattern(tileCanvas, "repeat");
-
-        // 🔥 Apply scale ONLY to preview
-        ctx.save();
-        ctx.scale(scalePercent / 100, scalePercent / 100);
-        ctx.fillStyle = pattern;
-
-        ctx.fillRect(
-            0,
-            0,
-            previewCanvas.width / (scalePercent / 100),
-            previewCanvas.height / (scalePercent / 100)
-        );
-
-        ctx.restore();
-
-        setPreview(previewCanvas.toDataURL("image/jpeg"));
+    const handleDimensionChange = (type, value) => {
+        const nextValue = Number(value);
+        if (!Number.isFinite(nextValue) || !baseRepeat) return;
+        setDimensionsFromScale(nextValue / (type === "width" ? baseRepeat.width : baseRepeat.height) * 100);
     };
-
-    // ---------------- CUSTOM INPUT ----------------
-    const handleRepeatInputChange = (type, value) => {
-        const num = parseFloat(value);
-        if (isNaN(num) || !imageObj) return;
-
-        if (!originalRepeatHeight || !originalRepeatWidth) return;
-
-        let newScale;
-
-        if (type === "height") {
-            newScale = (num / originalRepeatHeight) * 100;
-        } else {
-            newScale = (num / originalRepeatWidth) * 100;
-        }
-
-        updateFromScale(newScale, imageObj);
+    const reset = () => {
+        setImageObj(null); setImageSrc(null); setSelectedFile(null); setSelection(null); setBaseRepeat(null); setPreview(null); setScale(100); setSwatchName(""); setRepeatWidthIn(10.75); setRepeatHeightIn(12.5);
+        if (fileInputRef.current) fileInputRef.current.value = "";
     };
-
-    const handleScaleChange = (e) => {
-        const newScale = parseFloat(e.target.value);
-        if (isNaN(newScale) || !imageObj) return;
-
-        updateFromScale(newScale, imageObj);
-    };
-    // ---------------- IMPORT ----------------
     const handleImport = () => {
-        if (!selectedFile || !swatchName.trim()) {
-            alert("Load image and enter name");
-            return;
-        }
-
-        const sel = selection || { x: 0, y: 0, width: 0, height: 0 };
-        const payload = {
-            scale: scale || 100,
-            repeatWidth: repeatWidthIn || 0,
-            repeatHeight: repeatHeightIn || 0,
-            offset: { x: sel.x || 0, y: sel.y || 0 },
-            height: sel.height || 0,
-            width: sel.width || 0,
-            x: sel.x || 0,
-            y: sel.y || 0,
-            preview,
-        };
-
-        if (typeof onImport === "function") {
-            try {
-                onImport(selectedFile, swatchName.trim(), payload);
-                onClose();
-            } catch (err) {
-                console.error("onImport handler failed:", err);
-                alert("Import failed");
-            }
-        } else {
-            alert("No import handler provided");
-        }
+        if (!selectedFile || !swatchName.trim()) return alert("Load image and enter name");
+        const crop = selection || { x: 0, y: 0, width: imageObj?.width || 0, height: imageObj?.height || 0 };
+        onImport?.(selectedFile, swatchName.trim(), { scale, repeatWidth: repeatWidthIn, repeatHeight: repeatHeightIn, offset: { x: crop.x, y: crop.y }, x: crop.x, y: crop.y, width: crop.width, height: crop.height, preview });
+        onClose();
     };
 
-    // ---------------- UI (UNCHANGED STRUCTURE) ----------------
-    return (
-        <div
-            className="modal fade show"
-            style={{
-                display: "block",
-                background: "rgba(0,0,0,.35)",
-                zIndex: 9999
-            }}
-        >
-            <div
-                className="modal-dialog modal-dialog-centered"
-                style={{
-                    maxWidth: "1000px",
-                    width: "1000px"
-                }}
-            >
-                <div
-                    className="modal-content flex flex-col"
-                    style={{
-                        borderRadius: 0,
-                        background: "#e9ecef",
-                        border: "1px solid #666",
-                        padding: "15px",
-                        height: "560px"
-                    }}
-                >
-
-                    <div className="flex gap-3 mb-3">
-                        <button
-                            onClick={() => fileInputRef.current.click()}
-                            className="px-3 py-1 border border-black bg-gray-300 hover:bg-gray-400"
-                        >
-                            Load Image...
-                        </button>
-
-                        <input
-                            type="file"
-                            ref={fileInputRef}
-                            onChange={handleImageUpload}
-                            className="hidden"
-                        />
-
-                        <div className="flex-1 border border-black bg-white px-2 py-1 text-sm">
-                            {imageSrc ? "Image Loaded" : "No file selected"}
+    return <div className="modal fade show" style={{ display: "block", background: "rgba(0,0,0,.35)", zIndex: 9999 }}>
+        <div className="modal-dialog modal-dialog-centered" style={{ width: 700, maxWidth: 700, flex: "0 0 700px", margin: "auto" }}>
+            <div className="modal-content" style={{ boxSizing: "border-box", borderRadius: 0, background: "#e9edf1", border: "1px solid #444", padding: 9, height: 469, fontFamily: "Arial, sans-serif", color: "#111" }}>
+                <div style={{ display: "flex", gap: 5, height: 29 }}><button onClick={() => fileInputRef.current?.click()} className="fabric-button">Load Image...</button><input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} style={{ display: "none" }} /><div className="fabric-file-name">{imageSrc ? selectedFile?.name : ""}</div></div>
+                <div style={{ display: "flex", gap: 16, flex: 1, minHeight: 0, marginTop: 10 }}>
+                    <div ref={imageFrameRef} style={{ flex: "0 0 420px", width: 420, height: 379, border: "1px solid #666", background: "#fff", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>{imageObj && <canvas ref={canvasRef} onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} style={{ cursor: "crosshair", display: "block" }} />}</div>
+                    <div style={{ flex: "0 0 219px", width: 219, height: 379, border: "1px solid #666", padding: "8px 10px 8px", background: "#efefef", boxSizing: "border-box", display: "flex", flexDirection: "column" }}>
+                        <div style={{ display: "grid", gap: 3, fontSize: 13 }}>
+                            <label className="fabric-field"><span>Actual Width in Inches:</span><input type="number" step="0.01" value={repeatWidthIn} onChange={(e) => handleDimensionChange("width", e.target.value)} /></label>
+                            <label className="fabric-field"><span>Actual Height in Inches:</span><input type="number" step="0.01" value={repeatHeightIn} onChange={(e) => handleDimensionChange("height", e.target.value)} /></label>
+                            <label className="fabric-field"><span>Scale Percentage:</span><input type="number" step="0.01" value={scale} onChange={(e) => setDimensionsFromScale(e.target.value)} /></label>
                         </div>
+                        <hr style={{ width: "100%", border: 0, borderTop: "1px solid #ccc", margin: "6px 0 5px" }} /><label style={{ fontWeight: 700, fontSize: 11, marginBottom: 3 }}>Swatch Name:</label><input type="text" value={swatchName} onChange={(e) => setSwatchName(e.target.value)} style={{ width: "100%", height: 22, border: "1px solid #aaa", padding: "2px 4px", boxSizing: "border-box", fontSize: 11 }} />
+                        <div style={{ width: "100%", height: 242, border: "1px solid #777", background: "#fff", marginTop: 8, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>{preview ? <img src={preview} alt="Fabric repeat preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span style={{ fontSize: 13 }}>Drag to define repeat tile</span>}</div>
                     </div>
-
-                    <div className="flex flex-1 gap-4" style={{ display: "flex" }}>
-
-                        {/* Left Image */}
-                        <div
-                            ref={containerRef}
-                            style={{
-                                width: "435px",
-                                height: "360px",
-                                border: "1px solid #666",
-                                background: "#fff",
-                                overflow: "hidden"
-                            }}
-                        >
-                            {imageObj && (
-                                <canvas
-                                    ref={canvasRef}
-                                    onMouseDown={handleMouseDown}
-                                    onMouseMove={handleMouseMove}
-                                    onMouseUp={handleMouseUp}
-                                    className="cursor-crosshair"
-                                />
-                            )}
-                        </div>
-
-                        {/* Right Panel */}
-                        <div
-                            style={{
-                                width: "400px",
-                                height: "360px",
-                                border: "1px solid #666",
-                                padding: "12px",
-                                background: "#efefef",
-                                display: "flex",
-                                flexDirection: "column",
-                                justifyContent: "space-between"
-                            }}
-                        >
-                            {/* Top Content */}
-                            <div>
-                                <div className="space-y-3 text-sm" style={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    gap: "8px",
-                                }}>
-                                    <div className="flex justify-between">
-                                        <label>Repeat Width (in):</label>
-                                        <input
-                                            type="number"
-                                            value={repeatWidthIn}
-                                            onChange={(e) =>
-                                                handleRepeatInputChange("width", e.target.value)
-                                            }
-                                            className="w-20 border border-black px-1"
-                                        />
-                                    </div>
-
-                                    <div className="flex justify-between">
-                                        <label>Repeat Height (in):</label>
-                                        <input
-                                            type="number"
-                                            value={repeatHeightIn}
-                                            onChange={(e) =>
-                                                handleRepeatInputChange("height", e.target.value)
-                                            }
-                                            className="w-20 border border-black px-1"
-                                        />
-                                    </div>
-
-                                    <div className="flex justify-between">
-                                        <label>Scale Percentage:</label>
-                                        <input
-                                            type="number"
-                                            value={scale}
-                                            onChange={handleScaleChange}
-                                            className="w-20 border border-black px-1"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="mt-3">
-                                    <label className="block mb-1 text-sm">
-                                        Swatch Name:
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={swatchName}
-                                        onChange={(e) => setSwatchName(e.target.value)}
-                                        className="w-full border border-black px-2 py-1"
-                                    />
-                                </div>
-
-                                {/* <div
-                                    style={{
-                                        width: "100%",
-                                        height: "175px",
-                                        border: "1px solid #777",
-                                        background: "#fff",
-                                        marginTop: "15px"
-                                    }}
-                                >
-                                    {preview ? (
-                                        <img
-                                            src={preview}
-                                            alt="preview"
-                                            className="w-full h-full object-cover"
-                                        />
-                                    ) : (
-                                        <span className="text-gray-400 text-sm">
-                                            Drag to define repeat tile
-                                        </span>
-                                    )}
-                                </div> */}
-                                <div
-                                    style={{
-                                        width: "100%",
-                                        height: "175px",
-                                        border: "1px solid #777",
-                                        background: "#fff",
-                                        marginTop: "15px",
-                                        overflow: "hidden", // 👈 Image ko frame ke andar rakhega
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center"
-                                    }}
-                                >
-                                    {preview ? (
-                                        <img
-                                            src={preview}
-                                            alt="preview"
-                                            style={{
-                                                width: "100%",
-                                                height: "100%",
-                                                objectFit: "contain", // ya "cover" agar crop acceptable ho
-                                            }}
-                                        />
-                                    ) : (
-                                        <span className="text-gray-400 text-sm">
-                                            Drag to define repeat tile
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Bottom Buttons */}
-                            <div style={{ marginTop: "30px", display: "flex", justifyContent: "space-between" }} className="flex flex-col gap-2">
-                                <button
-                                    onClick={onClose}
-                                    className="w-full px-4 py-1 border border-black bg-gray-300 hover:bg-gray-400"
-                                >
-                                    Close
-                                </button>
-
-                                <div className="flex gap-2 mt-2 space-between">
-                                    <button
-                                        onClick={() => window.location.reload()}
-                                        className="flex-1 px-4 py-1 border border-black bg-gray-300 hover:bg-gray-400"
-                                    >
-                                        Reset
-                                    </button>
-
-                                    <button
-                                        onClick={handleImport}
-                                        className="flex-1 px-4 py-1 border border-black bg-gray-300 hover:bg-gray-400"
-                                    >
-                                        Import
-                                    </button>
-                                </div>
-                            </div>
-
-                        </div>
-
-                    </div>
-
                 </div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 10 }}><button onClick={onClose} className="fabric-button bottom-button">Close</button><div style={{ display: "flex", gap: 10 }}><button onClick={reset} className="fabric-button bottom-button">Reset</button><button onClick={handleImport} className="fabric-button bottom-button">Import</button></div></div>
             </div>
         </div>
-    );
+        <style>{`.fabric-button{border:1px solid #999;background:#e5e5e5;color:#111;font:600 12px Arial;padding:3px 12px;box-shadow:inset 0 1px #fff;cursor:pointer}.fabric-button:hover{background:#d7d7d7}.bottom-button{min-width:91px;height:21px;padding:1px 12px}.fabric-file-name{flex:1;border:1px solid #aaa;background:#fff;padding:5px 7px;font-size:12px;overflow:hidden;white-space:nowrap}.fabric-field{display:flex;align-items:center;justify-content:space-between;gap:5px;white-space:nowrap}.fabric-field input{width:62px;height:20px;border:1px solid #aaa;background:#fff;padding:1px 4px;font-size:12px;box-sizing:border-box}`}</style>
+    </div>;
 };
 
 export default FabricSwatch;
