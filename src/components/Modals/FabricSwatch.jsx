@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 
-// Client software's physical-size conversion: 7.5 image pixels represent one inch.
-const FABRIC_VALUE_DPI = 7.5;
+// Client software's physical-size conversion: 6 image pixels represent one inch.
+const FABRIC_VALUE_DPI = 11.25;
+const LEGACY_FABRIC_DPI = 6;
 const round = (value) => Number(value.toFixed(2));
-
 const FabricSwatch = ({ onClose, onImport }) => {
     const fileInputRef = useRef(null);
     const canvasRef = useRef(null);
@@ -15,6 +15,7 @@ const FabricSwatch = ({ onClose, onImport }) => {
     const [dragStart, setDragStart] = useState(null);
     const [displayScale, setDisplayScale] = useState(1);
     const [baseRepeat, setBaseRepeat] = useState(null);
+    const [imageDpi, setImageDpi] = useState(FABRIC_VALUE_DPI);
     const [repeatWidthIn, setRepeatWidthIn] = useState(10.75);
     const [repeatHeightIn, setRepeatHeightIn] = useState(12.5);
     const [scale, setScale] = useState(100);
@@ -54,7 +55,11 @@ const FabricSwatch = ({ onClose, onImport }) => {
             const img = new Image();
             img.onload = () => {
                 setSelectedFile(file); setImageObj(img); setImageSrc(reader.result); setSelection(null);
-                const fullSize = { width: img.width / FABRIC_VALUE_DPI, height: img.height / FABRIC_VALUE_DPI };
+                // High-resolution fabric images use the client's 266.667in canvas.
+                // Smaller/other images retain the old software rule: six pixels per inch.
+                const dpi = img.width >= 2000 ? img.width / 266.6666667 : LEGACY_FABRIC_DPI;
+                setImageDpi(dpi);
+                const fullSize = { width: img.width / dpi, height: img.height / dpi };
                 setBaseRepeat(fullSize); setScale(100); setRepeatWidthIn(round(fullSize.width)); setRepeatHeightIn(round(fullSize.height));
                 makePreview(img, null, 100);
             };
@@ -86,7 +91,7 @@ const FabricSwatch = ({ onClose, onImport }) => {
     };
     const handleMouseUp = () => {
         if (!dragStart || !selection || selection.width < 1 || selection.height < 1) { setDragStart(null); return; }
-        const nextBase = { width: selection.width / FABRIC_VALUE_DPI, height: selection.height / FABRIC_VALUE_DPI };
+        const nextBase = { width: selection.width / imageDpi, height: selection.height / imageDpi };
         setBaseRepeat(nextBase); setScale(100); setRepeatWidthIn(round(nextBase.width)); setRepeatHeightIn(round(nextBase.height)); makePreview(imageObj, selection, 100); setDragStart(null);
     };
     const handleDimensionChange = (type, value) => {
@@ -95,7 +100,7 @@ const FabricSwatch = ({ onClose, onImport }) => {
         setDimensionsFromScale(nextValue / (type === "width" ? baseRepeat.width : baseRepeat.height) * 100);
     };
     const reset = () => {
-        setImageObj(null); setImageSrc(null); setSelectedFile(null); setSelection(null); setBaseRepeat(null); setPreview(null); setScale(100); setSwatchName(""); setRepeatWidthIn(10.75); setRepeatHeightIn(12.5);
+        setImageObj(null); setImageSrc(null); setSelectedFile(null); setSelection(null); setBaseRepeat(null); setPreview(null); setScale(100); setSwatchName(""); setImageDpi(FABRIC_VALUE_DPI); setRepeatWidthIn(10.75); setRepeatHeightIn(12.5);
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
     const handleImport = () => {
