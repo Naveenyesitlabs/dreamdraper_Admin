@@ -32,10 +32,6 @@ export default function SvgConverter() {
     formData.append("type", selectedType);
     dispatch(convertSvg(formData));
     setIsUploadOpen(false);
-    if (sourcePreview) URL.revokeObjectURL(sourcePreview);
-    setFile(null);
-    setSourcePreview("");
-    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const clearFile = () => {
