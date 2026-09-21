@@ -60,7 +60,7 @@ export const convertSvgImage = (formData) => API.post(
   '/api/svg-convert',
   (() => {
     if (!formData.has('type')) formData.append('type', 'curtain');
-    formData.append('fabricColor', '#9a633f');
+    formData.append('fabricColor', '#b9b9b9');
     formData.append('outlineColor', '#555555');
     return formData;
   })(),
