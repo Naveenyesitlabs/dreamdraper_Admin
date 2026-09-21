@@ -133,6 +133,7 @@ export default function Sidebar() {
     { name: "Showcases", path: "/show-cases", icon: "/images/showcases.svg" },
     { name: "Subscription Management", path: "/subscription-management", icon: "/images/subscription.svg" },
     { name: "Plan Management", path: "/plan-management", icon: "/images/plan.svg" },
+    { name: "SVG Converter", path: "/svg-converter", icon: "/images/templateUpload.svg" },
   ];
 
   const sidebarLinksWithIcon = [
@@ -154,6 +155,7 @@ export default function Sidebar() {
     { path: "/show-cases", icon: "/images/showcases.svg" },
     { path: "/subscription-management", icon: "/images/subscription.svg" },
     { path: "/plan-management", icon: "/images/plan.svg" },
+    { path: "/svg-converter", icon: "/images/templateUpload.svg" },
   ];
 
   const isActive = (path) => location.pathname === path;

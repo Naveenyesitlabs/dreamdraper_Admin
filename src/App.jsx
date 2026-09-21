@@ -16,6 +16,7 @@ import NestedCategory from "./pages/categoryManager/NestedCategory";
 import SubNestedCategory from "./pages/categoryManager/SubNestedCategory";
 import RootModal from "./pages/auth/RootModal";
 import NotFound from "./pages/NotFound";
+import SvgConverter from "./pages/SvgConverter";
 import { SidebarProvider } from "./hooks/SidebarContext";
 import { ToastContainer } from "react-toastify";
 function AppLayout() {
@@ -42,6 +43,7 @@ function AppLayout() {
               <Route path="/show-cases" element={<Showcases />} />
               <Route path="/subscription-management" element={<SubscriptionManagement />} />
               <Route path="/plan-management" element={<PlanManagement />} />
+              <Route path="/svg-converter" element={<SvgConverter />} />
               <Route path="/main-category" element={<MainCategory />} />
               <Route path="/sub-category" element={<SubCategory />} />
               <Route path="/nested-category" element={<NestedCategory />} />

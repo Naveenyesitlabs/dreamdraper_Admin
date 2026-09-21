@@ -55,6 +55,17 @@ export const featchAllTemplate = () => API.get('/admin/all-designe');
 export const addTemplate = (formData) => API.post('/admin/upload-new-designe', formData)
 export const updateTemplate = (formData) => API.post('/admin/update-template', formData)
 export const uploadGlbImage = (formData) => API.post('/add-image/upload-glb', formData)
+// Temporary converter service URL; keep the existing Redux setup unchanged.
+export const convertSvgImage = (formData) => API.post(
+  '/api/svg-convert',
+  (() => {
+    if (!formData.has('type')) formData.append('type', 'curtain');
+    formData.append('fabricColor', '#9a633f');
+    formData.append('outlineColor', '#555555');
+    return formData;
+  })(),
+  { responseType: 'blob' }
+)
 
 // project manager
 export const getUserByProject = () => API.get('/admin/users')
