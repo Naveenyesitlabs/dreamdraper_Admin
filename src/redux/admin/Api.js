@@ -57,6 +57,7 @@ export const updateTemplate = (formData) => API.post('/admin/update-template', f
 export const uploadGlbImage = (formData) => API.post('/add-image/upload-glb', formData)
 // Temporary converter service URL; keep the existing Redux setup unchanged.
 export const convertSvgImage = (formData) => API.post(
+  // 'http://localhost:4100/api/convert',
   '/api/svg-convert',
   (() => {
     if (!formData.has('type')) formData.append('type', 'curtain');

@@ -65,7 +65,7 @@ export default function SvgConverter() {
         <button className="svg-modal-file-button" onClick={() => fileInputRef.current?.click()}>{file ? file.name : "Choose PNG, JPG or JPEG"}</button>
         <label className="svg-modal-label" htmlFor="converter-type">Type</label>
         <select id="converter-type" className="svg-type-select" value={selectedType} onChange={(event) => setSelectedType(event.target.value)}>
-          <option value="curtain">Curtain</option><option value="tablux">Tablelux</option>
+          <option value="curtain">Curtain</option><option value="tableaux">Tableaux</option>
         </select>
         <button className="svg-modal-submit" onClick={handleConvert} disabled={!file || loading}>{loading ? "Converting..." : "Submit"}</button>
       </div>
