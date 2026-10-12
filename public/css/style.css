@@ -615,6 +615,59 @@
   border-radius: 0 5px 5px 0 !important;
 }
 
+/* Keep the library identifiers visible while the wide table is scrolled. */
+.library-table {
+  --library-serial-width: 54px;
+  --library-name-width: 162px;
+}
+
+.library-table th:nth-child(1),
+.library-table td:nth-child(1),
+.library-table th:nth-child(2),
+.library-table td:nth-child(2) {
+  box-sizing: border-box;
+  position: sticky;
+}
+
+.library-table th:nth-child(1),
+.library-table td:nth-child(1) {
+  width: var(--library-serial-width);
+  min-width: var(--library-serial-width);
+  max-width: var(--library-serial-width);
+  left: 0;
+}
+
+.library-table th:nth-child(2),
+.library-table td:nth-child(2) {
+  width: var(--library-name-width);
+  min-width: var(--library-name-width);
+  max-width: var(--library-name-width);
+  left: var(--library-serial-width);
+}
+
+.library-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  background: #094271;
+}
+
+.library-table tbody td:nth-child(1),
+.library-table tbody td:nth-child(2) {
+  z-index: 3;
+  background: #fff;
+}
+
+.library-table thead th:nth-child(1),
+.library-table thead th:nth-child(2) {
+  z-index: 7;
+}
+
+.library-table tbody td:nth-child(2),
+.library-table thead th:nth-child(2) {
+  box-shadow: 3px 0 5px rgba(0, 0, 0, 0.08);
+}
+
 .pagination {
   display: flex;
   justify-content: center;

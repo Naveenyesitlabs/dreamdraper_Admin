@@ -223,7 +223,7 @@ const LibraryManagement = () => {
                         </div>
                         <div className="table-container">
                             <div className="scroll-table">
-                                <table ref={tableRef} className="custom-table">
+                                <table ref={tableRef} className="custom-table library-table">
                                     <thead>
                                         <tr>
                                             <th>S.No.</th>
