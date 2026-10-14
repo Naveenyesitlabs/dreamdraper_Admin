@@ -58,8 +58,8 @@ export const uploadGlbImage = (formData) => API.post('/add-image/upload-glb', fo
 // Temporary converter service URL; keep the existing Redux setup unchanged.
 export const convertSvgImage = (formData) => API.post(
   // 'http://localhost:4200/api/convert',
-  // '/api/svg-convert',
-  '/api/convert',
+  '/api/svg-convert',
+  // '/api/convert',
   (() => {
     if (!formData.has('type')) formData.append('type', 'curtain');
     formData.append('fabricColor', '#b9b9b9');
