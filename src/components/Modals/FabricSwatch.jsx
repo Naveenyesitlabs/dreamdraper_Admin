@@ -157,8 +157,10 @@ const FabricSwatch = ({ onClose, onImport }) => {
         setScale(formatAutomaticScale(nextScale));
         if (type === "width") {
             setRepeatWidthIn(safeValue);
+            setRepeatHeightIn(formatAutomaticDimension(baseRepeat.height * nextScale / 100));
         } else {
             setRepeatHeightIn(safeValue);
+            setRepeatWidthIn(formatAutomaticDimension(baseRepeat.width * nextScale / 100));
         }
         makePreview(imageObj, selection, nextScale);
     };
